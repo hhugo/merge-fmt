@@ -1,0 +1,48 @@
+37a38,42
+>       system "git rebase branch2^ -q";
+>       print_status ();
+>       [%expect
+>         {|
+>         no changes |}];
+54c59
+<         DU File a.ml
+---
+>         UU File b.ml
+55a61,64
+>         <<<<<<< HEAD
+>         type t = { a : int; b : string;
+>                    c : float; d : unit option }
+>         =======
+60c69,70
+<           } |}];
+---
+>           }
+>         >>>>>>> second commit (fork) |}];
+62,64c72
+<       [%expect {|
+<         Ignore a.ml (not a 3-way merge)
+<         Exit with 1 |}];
+---
+>       [%expect {| Resolved 1/1 b.ml |}];
+68,69c76
+<         DU File a.ml
+< 
+---
+>         M File b.ml
+71,73c78,81
+<           { a : int option;
+<             b : string;
+<             c : float;
+---
+>           { a : int option
+>           ; b : string
+>           ; c : float
+>           ; d : unit option
+76,80c84
+<       [%expect {|
+<         a.ml: needs merge
+<         You must edit all merge conflicts and then
+<         mark them as resolved using git add
+<         Exit with 1 |}] )
+---
+>       [%expect {| |}] )

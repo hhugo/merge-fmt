@@ -1,0 +1,17 @@
+(rule
+ (targets merge-fmt-help.txt)
+ (deps ./src/merge_fmt.exe)
+ (mode promote)
+ (action (with-stdout-to %{targets} (run ./src/merge_fmt.exe --help=plain))))
+
+(rule
+ (targets merge-fmt-mergetool-help.txt)
+ (deps ./src/merge_fmt.exe)
+ (mode promote)
+ (action (with-stdout-to %{targets} (run ./src/merge_fmt.exe mergetool --help=plain))))
+
+(rule
+ (targets merge-fmt-mergetool-setup-help.txt)
+ (deps ./src/merge_fmt.exe)
+ (mode promote)
+ (action (with-stdout-to %{targets} (run ./src/merge_fmt.exe mergetool-setup --help=plain))))
