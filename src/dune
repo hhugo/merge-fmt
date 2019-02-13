@@ -1,0 +1,5 @@
+(executables
+  (names merge_fmt)
+  (public_names merge-fmt)
+  (libraries base stdio unix cmdliner)
+)

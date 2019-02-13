@@ -1,0 +1,29 @@
+NAME
+       merge-fmt-mergetool - git mergetool
+
+SYNOPSIS
+       merge-fmt mergetool [OPTION]... 
+
+OPTIONS
+       --base=<base-file>
+
+       --current=<current-file>
+
+       --echo
+           Echo all commands.
+
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of `auto',
+           `pager', `groff' or `plain'. With `auto', the format is `pager` or
+           `plain' whenever the TERM env var is `dumb' or undefined.
+
+       -o <output-to>
+
+       --ocamlformat=VAL
+           ocamlformat path
+
+       --other=<other-file>
+
+       --refmt=VAL
+           refmt path
+
