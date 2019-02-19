@@ -2,9 +2,9 @@ opam-version: "2.0"
 maintainer:   "hugo.heuzard@gmail.com"
 authors:      "Hugo Heuzard"
 homepage:     "https://github.com/hhugo/merge-fmt"
+doc:          "https://hhugo.github.io/merge-fmt/"
 bug-reports:  "https://github.com/hhugo/merge-fmt/issues"
 dev-repo:     "git+https://github.com/hhugo/merge-fmt.git"
-
 name: "merge-fmt"
 
 build: [["dune" "build" "-p" name "-j" jobs]]
@@ -17,4 +17,7 @@ depends: [
   "stdio"
 ]
 
-synopsis: "Help merge-fmt across style changes"
+synopsis: "Git mergetool leveraging code formatters"
+description: """
+`merge-fmt` is a small wrapper on top git commands to help resolve conflicts by leveraging code formatters.
+"""
