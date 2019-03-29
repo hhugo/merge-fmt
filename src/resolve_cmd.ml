@@ -100,7 +100,7 @@ let resolve config echo () =
   Map.iteri all ~f:(fun ~key:filename ~data:versions ->
       match versions with
       | Ok versions -> (
-        match Fmters.find ~config ~filename with
+        match Fmters.find ~config ~filename ~name:None with
         | Some formatter ->
             let n1 = conflict ~filename in
             Result.bind (fix ~echo ~filename ~versions ~formatter) ~f:(fun () ->
