@@ -8,25 +8,20 @@ type config =
 
 type t = string
 
-let ocamlformat ~bin =
-  sprintf "%s -i" (Option.value ~default:"ocamlformat" bin)
-
-let ocp_indent ~bin = sprintf "%s -i" (Option.value ~default:"ocp-indent" bin)
+let ocamlformat ~bin ~name =
+  sprintf "%s -i %s"
+    (Option.value ~default:"ocamlformat" bin)
+    (Option.value_map ~default:"" ~f:(fun name -> " --name=" ^ name) name)
 
 let refmt ~bin = sprintf "%s --inplace" (Option.value ~default:"refmt" bin)
 
-let find ~config ~filename =
+let find ~config ~filename ~name =
+  let filename = Option.value ~default:filename name in
   match (Caml.Filename.extension filename, config) with
   | (".ml" | ".mli"), { ocamlformat_path; _ } ->
-      Some (ocamlformat ~bin:ocamlformat_path)
+      Some (ocamlformat ~bin:ocamlformat_path ~name)
   | (".re" | ".rei"), { refmt_path; _ } -> Some (refmt ~bin:refmt_path)
   | _ -> None
-
-let ocamlformat = ocamlformat ~bin:None
-
-let ocp_indent = ocp_indent ~bin:None
-
-let refmt = refmt ~bin:None
 
 let run t ~echo ~filename = system ~echo "%s %s" t filename
 

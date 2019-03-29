@@ -17,6 +17,9 @@ OPTIONS
            `pager', `groff' or `plain'. With `auto', the format is `pager` or
            `plain' whenever the TERM env var is `dumb' or undefined.
 
+       --name=<result-name>
+           pathname in which the merged result will be stored
+
        -o <output-to>
 
        --ocamlformat=VAL

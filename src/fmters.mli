@@ -4,13 +4,7 @@ type config
 
 type t
 
-val ocamlformat : t
-
-val ocp_indent : t
-
-val refmt : t
-
-val find : config:config -> filename:string -> t option
+val find : config:config -> filename:string -> name:string option -> t option
 
 val run : t -> echo:bool -> filename:string -> (unit, unit) Result.t
 
