@@ -7,7 +7,8 @@ help:
 	dune build \
 		merge-fmt-help.txt \
 		merge-fmt-mergetool-help.txt \
-		merge-fmt-mergetool-setup-help.txt
+		merge-fmt-setup-mergetool-help.txt \
+		merge-fmt-setup-merge-help.txt
 .PHONY: test
 test:
 	dune build @runtest

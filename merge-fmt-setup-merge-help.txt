@@ -1,8 +1,9 @@
 NAME
-       merge-fmt-mergetool-setup - Configure git with merge-fmt mergetool
+       merge-fmt-setup-merge - Register the [merge-fmt] mergetool as the
+       default merge driver in git
 
 SYNOPSIS
-       merge-fmt mergetool-setup [OPTION]... 
+       merge-fmt setup-merge [OPTION]... 
 
 OPTIONS
        --echo

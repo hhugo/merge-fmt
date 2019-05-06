@@ -45,6 +45,10 @@ let print_status () =
           printf "%s File %s\n" m f;
           print_endline (In_channel.read_all f))
 
+let print_file file =
+  printf "File %s\n" file;
+  print_endline (In_channel.read_all file)
+
 let git_init () =
   system "git init . -q";
   write ".ocamlformat" "profile=janestreet";

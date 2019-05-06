@@ -23,7 +23,7 @@ resolve conflicts automatically.
 ### As a Git mergetool
 `merge-fmt` can act as a git [mergetool](https://git-scm.com/docs/git-mergetool).
 First configure the current git repository with
-```merge-fmt mergetool-setup --update```
+```merge-fmt setup-mergetool --update```
 Then, use `git mergetool` to resolve conflicts with
 ```git mergetool -t mergefmt```
 

@@ -9,8 +9,12 @@ COMMANDS
        mergetool
            git mergetool
 
-       mergetool-setup
-           Configure git with merge-fmt mergetool
+       setup-merge
+           Register the [merge-fmt] mergetool as the default merge driver in
+           git
+
+       setup-mergetool
+           Register the [merge-fmt] mergetool in git
 
 OPTIONS
        --echo
