@@ -5,8 +5,7 @@ open! Common
 let%expect_test _ =
   within_temp_dir (fun () ->
       git_init ();
-      write
-        "a.ml"
+      write "a.ml"
         {|
 type t = { a : int;
            b : string;
@@ -16,8 +15,7 @@ type t = { a : int;
       git_commit "first commit";
       git_branch "branch1";
       (* Add new field, move file *)
-      write
-        "a.ml"
+      write "a.ml"
         {|
 type t = { a : int;
            b : string;
@@ -27,8 +25,7 @@ type t = { a : int;
       system "git mv a.ml b.ml";
       git_commit "second commit";
       (* Add new type *)
-      write
-        "b.ml"
+      write "b.ml"
         {|
 type t = { a : int;
            b : string;
@@ -41,7 +38,8 @@ type u = A | B of int
       git_branch "branch2";
       (* Go back to branch1, turn [a] to [int option], reformat *)
       git_checkout "branch1";
-      write "a.ml" {|
+      write "a.ml"
+        {|
 type t =
   { a : int option
   ; b : string
@@ -51,8 +49,7 @@ type t =
       git_commit "second commit (fork)";
       [%expect {| Switched to branch 'branch1' |}];
       (* add new type before *)
-      write
-        "a.ml"
+      write "a.ml"
         {|
 type b = int
 
@@ -127,7 +124,8 @@ type t =
 
         Exit with 128 |}];
       print_status ();
-      [%expect {|
+      [%expect
+        {|
         UU File b.ml
         <<<<<<< HEAD:b.ml
         =======
@@ -149,7 +147,8 @@ type t =
       resolve ();
       [%expect {| Resolved 1/1 b.ml |}];
       print_status ();
-      [%expect {|
+      [%expect
+        {|
         M File b.ml
         type b = int
 
@@ -164,6 +163,4 @@ type t =
           | A
           | B of int |}];
       system "git rebase --continue";
-      [%expect
-        {| |}]
-  )
+      [%expect {| |}] )

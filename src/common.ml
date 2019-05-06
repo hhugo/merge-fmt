@@ -44,5 +44,5 @@ module Flags = struct
 
   let echo =
     let doc = "Echo all commands." in
-    Arg.(value & flag & info ["echo"] ~doc)
+    Arg.(value & flag & info [ "echo" ] ~doc)
 end

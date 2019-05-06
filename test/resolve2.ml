@@ -5,8 +5,7 @@ open! Common
 let%expect_test _ =
   within_temp_dir (fun () ->
       git_init ();
-      write
-        "a.ml"
+      write "a.ml"
         {|
 type t = { a : int;
            b : string;
@@ -15,8 +14,7 @@ type t = { a : int;
 |};
       git_commit "first commit";
       git_branch "branch1";
-      write
-        "a.ml"
+      write "a.ml"
         {|
 type t = { a : int;
            b : string;
@@ -29,7 +27,8 @@ type t = { a : int;
       git_branch "branch2";
       [%expect {||}];
       git_checkout "branch1";
-      write "a.ml" {|
+      write "a.ml"
+        {|
 type t =
   { a : int option;
     b : string;

@@ -5,8 +5,7 @@ open! Common
 let%expect_test _ =
   within_temp_dir (fun () ->
       git_init ();
-      write
-        "a.ml"
+      write "a.ml"
         {|
 type t = { a : int;
            b : string;
@@ -16,8 +15,7 @@ type t = { a : int;
       git_branch "branch1";
       system "git mv a.ml b.ml";
       git_commit "move a to b";
-      write
-        "b.ml"
+      write "b.ml"
         {|
 type t = { a : int; b : string;
            c : float; d : unit option }
@@ -25,7 +23,8 @@ type t = { a : int; b : string;
       git_commit "second commit";
       git_branch "branch2";
       git_checkout "branch1";
-      write "a.ml" {|
+      write "a.ml"
+        {|
 type t =
   { a : int option;
     b : string;
@@ -59,7 +58,8 @@ type t =
             c : float;
           } |}];
       resolve ();
-      [%expect {|
+      [%expect
+        {|
         Ignore a.ml (not a 3-way merge)
         Exit with 1 |}];
       print_status ();
@@ -73,8 +73,10 @@ type t =
             c : float;
           } |}];
       system "git rebase --continue";
-      [%expect {|
+      [%expect
+        {|
         a.ml: needs merge
         You must edit all merge conflicts and then
         mark them as resolved using git add
-        Exit with 1 |}] )
+        Exit with 1 |}]
+  )

@@ -35,7 +35,7 @@ let print_status () =
           String.split (String.strip line) ~on:' '
           |> List.filter ~f:(function "" -> false | _ -> true)
         with
-        | [m; filename] -> Some (m, filename)
+        | [ m; filename ] -> Some (m, filename)
         | _ -> assert false )
   in
   match stats with
@@ -64,7 +64,9 @@ let with_temp_dir f =
   (* Note that this blocks *)
   assert (Filename.is_absolute dir);
   let res = match f dir with x -> Ok x | exception e -> Error e in
-  if keep_tmp_dir then eprintf "OUTPUT LEFT IN %s\n" dir else system "rm -rf %s" dir;
+  if keep_tmp_dir
+  then eprintf "OUTPUT LEFT IN %s\n" dir
+  else system "rm -rf %s" dir;
   Result.ok_exn res
 
 let within_temp_dir ?(links = []) f =
@@ -75,7 +77,8 @@ let within_temp_dir ?(links = []) f =
       let path_var = "PATH" in
       let old_path = Sys.getenv_exn path_var in
       let bin = temp_dir ^/ "bin" in
-      Unix.putenv ~key:path_var ~data:(String.concat ~sep:":" [bin; old_path]);
+      Unix.putenv ~key:path_var
+        ~data:(String.concat ~sep:":" [ bin; old_path ]);
       let () = system "mkdir %s" bin in
       let () =
         List.iter links ~f:(fun (file, action, link_as) ->

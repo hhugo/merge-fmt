@@ -5,8 +5,7 @@ open! Common
 let%expect_test _ =
   within_temp_dir (fun () ->
       git_init ();
-      write
-        "a.ml"
+      write "a.ml"
         {|
 type t = { a : int;
            b : string;
@@ -16,8 +15,7 @@ type t = { a : int;
       git_branch "branch1";
       system "git mv a.ml b.ml";
       git_commit "move a to b";
-      write
-        "b.ml"
+      write "b.ml"
         {|
 type t = { a : int; b : string;
            c : float; d : unit option }
@@ -25,7 +23,8 @@ type t = { a : int; b : string;
       git_commit "second commit";
       git_branch "branch2";
       git_checkout "branch1";
-      write "a.ml" {|
+      write "a.ml"
+        {|
 type t =
   { a : int option;
     b : string;
@@ -37,8 +36,7 @@ type t =
       [%expect {| Switched to branch 'branch1' |}];
       system "git rebase branch2^ -q";
       print_status ();
-      [%expect
-        {|
+      [%expect {|
         no changes |}];
       system "git rebase branch2 -q";
       [%expect
