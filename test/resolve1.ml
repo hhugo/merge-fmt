@@ -14,6 +14,7 @@ type t = { a : int;
 |};
       git_commit "first commit";
       git_branch "branch1";
+
       (* Add new field, move file *)
       write "a.ml"
         {|
@@ -24,6 +25,7 @@ type t = { a : int;
 |};
       system "git mv a.ml b.ml";
       git_commit "second commit";
+
       (* Add new type *)
       write "b.ml"
         {|
@@ -36,6 +38,7 @@ type u = A | B of int
 |};
       git_commit "third commit";
       git_branch "branch2";
+
       (* Go back to branch1, turn [a] to [int option], reformat *)
       git_checkout "branch1";
       write "a.ml"
@@ -48,6 +51,7 @@ type t =
 |};
       git_commit "second commit (fork)";
       [%expect {| Switched to branch 'branch1' |}];
+
       (* add new type before *)
       write "a.ml"
         {|
@@ -163,4 +167,4 @@ type t =
           | A
           | B of int |}];
       system "git rebase --continue";
-      [%expect {| |}] )
+      [%expect {| |}])

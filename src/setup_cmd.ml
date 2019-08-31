@@ -15,7 +15,7 @@ let setup update_git_config echo merge_fmt_path =
   List.iter commands ~f:(fun line ->
       if update_git_config
       then system_respect_exit ~echo "%s" line
-      else Out_channel.printf "%s\n%!" line )
+      else Out_channel.printf "%s\n%!" line)
 
 open Cmdliner
 

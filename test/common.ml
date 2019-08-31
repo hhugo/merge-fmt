@@ -12,7 +12,7 @@ let system fmt =
       match p with
       | Ok () -> ()
       | Error (`Signal _) -> printf "Signaled\n"
-      | Error (`Exit_non_zero n) -> printf "Exit with %d\n" n )
+      | Error (`Exit_non_zero n) -> printf "Exit with %d\n" n)
     fmt
 
 let git_add fn = system "git add %s" fn
@@ -36,14 +36,14 @@ let print_status () =
           |> List.filter ~f:(function "" -> false | _ -> true)
         with
         | [ m; filename ] -> Some (m, filename)
-        | _ -> assert false )
+        | _ -> assert false)
   in
   match stats with
   | [] -> printf "no changes"
   | l ->
       List.iter l ~f:(fun (m, f) ->
           printf "%s File %s\n" m f;
-          print_endline (In_channel.read_all f) )
+          print_endline (In_channel.read_all f))
 
 let git_init () =
   system "git init . -q";
@@ -89,10 +89,10 @@ let within_temp_dir ?(links = []) f =
             in
             (* We use hard links to ensure that files remain available and unchanged even if
            jenga starts to rebuild while the test is running. *)
-            system "/bin/ln -T %s %s" file (temp_dir ^/ link_as) )
+            system "/bin/ln -T %s %s" file (temp_dir ^/ link_as))
       in
       let () = Unix.chdir temp_dir in
       let res = match f () with x -> Ok x | exception e -> Error e in
       Unix.putenv ~key:path_var ~data:old_path;
       Unix.chdir cwd;
-      Result.ok_exn res )
+      Result.ok_exn res)

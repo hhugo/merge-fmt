@@ -7,7 +7,7 @@ let open_process_in ~echo fmt =
   Printf.ksprintf
     (fun s ->
       if echo then eprintf "+ %s\n%!" s;
-      Unix.open_process_in s )
+      Unix.open_process_in s)
     fmt
 
 let open_process_in_respect_exit ~echo fmt =
@@ -19,14 +19,14 @@ let open_process_in_respect_exit ~echo fmt =
       match Unix.close_process_in ic with
       | WEXITED 0 -> contents
       | WEXITED n -> Caml.exit n
-      | WSIGNALED _ | WSTOPPED _ -> Caml.exit 1 )
+      | WSIGNALED _ | WSTOPPED _ -> Caml.exit 1)
     fmt
 
 let system ~echo fmt =
   Printf.ksprintf
     (fun s ->
       if echo then eprintf "+ %s\n%!" s;
-      match Unix.system s with WEXITED 0 -> Ok () | _ -> Error () )
+      match Unix.system s with WEXITED 0 -> Ok () | _ -> Error ())
     fmt
 
 let system_respect_exit ~echo fmt =
@@ -36,7 +36,7 @@ let system_respect_exit ~echo fmt =
       match Unix.system s with
       | WEXITED 0 -> ()
       | WEXITED n -> Caml.exit n
-      | WSIGNALED _ | WSTOPPED _ -> Caml.exit 1 )
+      | WSIGNALED _ | WSTOPPED _ -> Caml.exit 1)
     fmt
 
 module Flags = struct

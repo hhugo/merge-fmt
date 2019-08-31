@@ -30,7 +30,7 @@ let conflict ~filename =
             then loop (Int.succ n)
             else loop n
       in
-      loop 0 )
+      loop 0)
 
 let ls ~echo () =
   let ic = open_process_in ~echo "git ls-files -u" in
@@ -38,9 +38,9 @@ let ls ~echo () =
     match In_channel.input_line ic with
     | None -> acc
     | Some line -> (
-      match String.split_on_chars ~on:[ ' '; '\t' ] line with
-      | [ _; id; num; file ] -> loop ((file, (Int.of_string num, id)) :: acc)
-      | _ -> failwith "unexpected format" )
+        match String.split_on_chars ~on:[ ' '; '\t' ] line with
+        | [ _; id; num; file ] -> loop ((file, (Int.of_string num, id)) :: acc)
+        | _ -> failwith "unexpected format" )
   in
   let map = Map.of_alist_multi (module String) (loop []) in
   Map.map map ~f:(fun l ->
@@ -52,7 +52,7 @@ let ls ~echo () =
             ; ours = Object ours
             ; theirs = Object theirs
             }
-      | _ -> Error "not a 3-way merge" )
+      | _ -> Error "not a 3-way merge")
 
 let show ~echo version versions =
   let obj =
@@ -99,13 +99,13 @@ let fix ~echo ~filename ~versions ~formatter =
       eprintf "Failed to format %s\n%!" (String.concat ~sep:", " l);
       Error ()
   | Ok () -> (
-    match merge ~echo ~ours ~theirs ~common ~output:filename with
-    | Error _ -> Error ()
-    | Ok () ->
-        Unix.unlink ours;
-        Unix.unlink theirs;
-        Unix.unlink common;
-        Ok () )
+      match merge ~echo ~ours ~theirs ~common ~output:filename with
+      | Error _ -> Error ()
+      | Ok () ->
+          Unix.unlink ours;
+          Unix.unlink theirs;
+          Unix.unlink common;
+          Ok () )
 
 let resolve config echo () =
   let all = ls ~echo () in
@@ -116,16 +116,16 @@ let resolve config echo () =
   Map.iteri all ~f:(fun ~key:filename ~data:versions ->
       match versions with
       | Ok versions -> (
-        match Fmters.find ~config ~filename with
-        | Some formatter ->
-            let n1 = conflict ~filename in
-            Result.bind (fix ~echo ~filename ~versions ~formatter)
-              ~f:(fun () -> git_add ~echo ~filename)
-            |> (ignore : (unit, unit) Result.t -> unit);
-            let n2 = conflict ~filename in
-            eprintf "Resolved %d/%d %s\n%!" (n1 - n2) n1 filename
-        | None -> eprintf "Ignore %s (no formatter register)\n%!" filename )
-      | Error reason -> eprintf "Ignore %s (%s)\n%!" filename reason );
+          match Fmters.find ~config ~filename with
+          | Some formatter ->
+              let n1 = conflict ~filename in
+              Result.bind (fix ~echo ~filename ~versions ~formatter)
+                ~f:(fun () -> git_add ~echo ~filename)
+              |> (ignore : (unit, unit) Result.t -> unit);
+              let n2 = conflict ~filename in
+              eprintf "Resolved %d/%d %s\n%!" (n1 - n2) n1 filename
+          | None -> eprintf "Ignore %s (no formatter register)\n%!" filename )
+      | Error reason -> eprintf "Ignore %s (%s)\n%!" filename reason);
   let all = ls ~echo () in
   if Map.is_empty all then Caml.exit 0 else Caml.exit 1
 

@@ -78,5 +78,4 @@ type t =
         a.ml: needs merge
         You must edit all merge conflicts and then
         mark them as resolved using git add
-        Exit with 1 |}]
-  )
+        Exit with 1 |}])

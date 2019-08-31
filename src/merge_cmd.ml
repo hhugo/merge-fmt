@@ -14,34 +14,35 @@ let merge config echo current base other output =
   | (None | Some ""), _, _ | _, (None | Some ""), _ | _, _, (None | Some "") ->
       Caml.exit 1
   | Some current, Some base, Some other -> (
-    match Fmters.find ~config ~filename:current with
-    | None ->
-        debug "Couldn't find a formatter for %s\n%!" current;
-        system_respect_exit ~echo "git merge-file %s %s %s" current base other
-    | Some formatter -> (
-        let x =
-          Fmters.run formatter ~echo ~filename:current
-          |> Result.map_error ~f:(Fn.const "current")
-        and y =
-          Fmters.run formatter ~echo ~filename:other
-          |> Result.map_error ~f:(Fn.const "other")
-        and z =
-          Fmters.run formatter ~echo ~filename:base
-          |> Result.map_error ~f:(Fn.const "base")
-        in
-        match Result.combine_errors [ x; y; z ] with
-        | Error _ -> Caml.exit 1
-        | Ok (_ : unit list) ->
-            debug "process all three revision successfully\n%!";
-            debug "running git merge-file\n%!";
-            let result =
-              open_process_in_respect_exit ~echo "git merge-file -p %s %s %s"
-                current base other
-            in
-            ( match output with
-            | None -> Out_channel.output_string stdout result
-            | Some o -> Out_channel.write_all o ~data:result );
-            Caml.exit 0 ) )
+      match Fmters.find ~config ~filename:current with
+      | None ->
+          debug "Couldn't find a formatter for %s\n%!" current;
+          system_respect_exit ~echo "git merge-file %s %s %s" current base
+            other
+      | Some formatter -> (
+          let x =
+            Fmters.run formatter ~echo ~filename:current
+            |> Result.map_error ~f:(Fn.const "current")
+          and y =
+            Fmters.run formatter ~echo ~filename:other
+            |> Result.map_error ~f:(Fn.const "other")
+          and z =
+            Fmters.run formatter ~echo ~filename:base
+            |> Result.map_error ~f:(Fn.const "base")
+          in
+          match Result.combine_errors [ x; y; z ] with
+          | Error _ -> Caml.exit 1
+          | Ok (_ : unit list) ->
+              debug "process all three revision successfully\n%!";
+              debug "running git merge-file\n%!";
+              let result =
+                open_process_in_respect_exit ~echo "git merge-file -p %s %s %s"
+                  current base other
+              in
+              ( match output with
+              | None -> Out_channel.output_string stdout result
+              | Some o -> Out_channel.write_all o ~data:result );
+              Caml.exit 0 ) )
 
 open Cmdliner
 

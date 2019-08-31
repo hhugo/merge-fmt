@@ -171,4 +171,4 @@ let x = 5
       system "git add b.ml";
       [%expect {||}];
       system "git rebase --continue";
-      [%expect {||}] )
+      [%expect {||}])

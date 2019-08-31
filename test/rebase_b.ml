@@ -79,4 +79,4 @@ type t =
           ; d : unit option
           } |}];
       system "git rebase --continue";
-      [%expect {| |}] )
+      [%expect {| |}])
