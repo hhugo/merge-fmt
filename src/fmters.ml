@@ -9,8 +9,7 @@ type config =
 type t = string
 
 let ocamlformat ~bin =
-  sprintf "%s -i --disable-outside-detected-project"
-    (Option.value ~default:"ocamlformat" bin)
+  sprintf "%s -i" (Option.value ~default:"ocamlformat" bin)
 
 let ocp_indent ~bin = sprintf "%s -i" (Option.value ~default:"ocp-indent" bin)
 
@@ -44,6 +43,7 @@ module Flags = struct
 
   let t =
     Term.(
-      pure (fun ocamlformat_path refmt_path -> { ocamlformat_path; refmt_path })
+      pure (fun ocamlformat_path refmt_path ->
+          { ocamlformat_path; refmt_path })
       $ ocamlformat_path $ refmt_path)
 end
