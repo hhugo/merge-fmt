@@ -12,9 +12,9 @@ code formatters.
 
 Note that supporting new code formatters is trivial.
 
-Getting starting
+Getting started
 ----------------
-There are two ways to use merge-fmt.
+There are three ways to use merge-fmt.
 
 ### Standalone
 Just call `merge-fmt` while there are unresolved conflicts. `merge-fmt` will try
@@ -23,9 +23,24 @@ resolve conflicts automatically.
 ### As a Git mergetool
 `merge-fmt` can act as a git [mergetool](https://git-scm.com/docs/git-mergetool).
 First configure the current git repository with
-```merge-fmt setup-mergetool --update```
+```
+merge-fmt setup-mergetool
+git config --local mergetool.mergefmt.cmd 'merge-fmt mergetool --base=$BASE --current=$LOCAL --other=$REMOTE -o $MERGED'
+git config --local mergetool.mergefmt.trustExitCode true
+```
 Then, use `git mergetool` to resolve conflicts with
 ```git mergetool -t mergefmt```
+
+### As a git merge driver
+`merge-fmt` can act as a git [merge driver](https://git-scm.com/docs/gitattributes).
+Configure the current git repository to use merge-fmt as the default merge driver.
+```
+$ merge-fmt setup-merge
+git config --local merge.mergefmt.name 'merge-fmt driver'
+git config --local merge.mergefmt.driver 'merge-fmt mergetool --base=%O --current=%A --other=%B -o %A --name=%P'
+git config --local merge.tool 'mergefmt'
+git config --local merge.default 'mergefmt'
+```
 
 
 Install
