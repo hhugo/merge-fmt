@@ -38,7 +38,6 @@ module Flags = struct
 
   let t =
     Term.(
-      pure (fun ocamlformat_path refmt_path ->
-          { ocamlformat_path; refmt_path })
+      pure (fun ocamlformat_path refmt_path -> { ocamlformat_path; refmt_path })
       $ ocamlformat_path $ refmt_path)
 end

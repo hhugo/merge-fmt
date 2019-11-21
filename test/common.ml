@@ -81,8 +81,7 @@ let within_temp_dir ?(links = []) f =
       let path_var = "PATH" in
       let old_path = Sys.getenv_exn path_var in
       let bin = temp_dir ^/ "bin" in
-      Unix.putenv ~key:path_var
-        ~data:(String.concat ~sep:":" [ bin; old_path ]);
+      Unix.putenv ~key:path_var ~data:(String.concat ~sep:":" [ bin; old_path ]);
       let () = system "mkdir %s" bin in
       let () =
         List.iter links ~f:(fun (file, action, link_as) ->

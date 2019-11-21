@@ -17,8 +17,7 @@ let merge config echo current base other output name =
       match Fmters.find ~config ~filename:current ~name with
       | None ->
           debug "Couldn't find a formatter for %s\n%!" current;
-          system_respect_exit ~echo "git merge-file %s %s %s" current base
-            other
+          system_respect_exit ~echo "git merge-file %s %s %s" current base other
       | Some formatter -> (
           let x =
             Fmters.run formatter ~echo ~filename:current
