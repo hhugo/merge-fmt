@@ -40,7 +40,7 @@ let ls ~echo () =
     | Some line -> (
         match String.split_on_chars ~on:[ ' '; '\t' ] line with
         | [ _; id; num; file ] -> loop ((file, (Int.of_string num, id)) :: acc)
-        | _ -> failwith "unexpected format" )
+        | _ -> failwith "unexpected format")
   in
   let map = Map.of_alist_multi (module String) (loop []) in
   Map.map map ~f:(fun l ->
@@ -105,14 +105,14 @@ let fix ~echo ~filename ~versions ~formatter =
           Unix.unlink ours;
           Unix.unlink theirs;
           Unix.unlink common;
-          Ok () )
+          Ok ())
 
 let resolve config echo () =
   let all = ls ~echo () in
   if Map.is_empty all
   then (
     eprintf "Nothing to resolve\n%!";
-    Caml.exit 1 );
+    Caml.exit 1);
   Map.iteri all ~f:(fun ~key:filename ~data:versions ->
       match versions with
       | Ok versions -> (
@@ -124,7 +124,7 @@ let resolve config echo () =
               |> (ignore : (unit, unit) Result.t -> unit);
               let n2 = conflict ~filename in
               eprintf "Resolved %d/%d %s\n%!" (n1 - n2) n1 filename
-          | None -> eprintf "Ignore %s (no formatter register)\n%!" filename )
+          | None -> eprintf "Ignore %s (no formatter register)\n%!" filename)
       | Error reason -> eprintf "Ignore %s (%s)\n%!" filename reason);
   let all = ls ~echo () in
   if Map.is_empty all then Caml.exit 0 else Caml.exit 1

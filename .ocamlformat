@@ -3,4 +3,4 @@ type-decl=sparse
 break-separators=before
 if-then-else=keyword-first
 dock-collection-brackets=false
-version=0.12
+version=0.24.1
