@@ -38,10 +38,10 @@ let merge config echo current base other output name =
                 open_process_in_respect_exit ~echo "git merge-file -p %s %s %s"
                   current base other
               in
-              ( match output with
+              (match output with
               | None -> Out_channel.output_string stdout result
-              | Some o -> Out_channel.write_all o ~data:result );
-              Caml.exit 0 ) )
+              | Some o -> Out_channel.write_all o ~data:result);
+              Caml.exit 0))
 
 open Cmdliner
 

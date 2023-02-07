@@ -16,11 +16,8 @@ let system fmt =
     fmt
 
 let git_add fn = system "git add %s" fn
-
 let git_commit msg = system "git commit -m %S -q" msg
-
 let git_branch br = system "git branch %s" br
-
 let git_checkout name = system "git checkout %s" name
 
 let write fn content =
@@ -91,7 +88,7 @@ let within_temp_dir ?(links = []) f =
               | `In_temp_as -> link_as
             in
             (* We use hard links to ensure that files remain available and unchanged even if
-           jenga starts to rebuild while the test is running. *)
+               jenga starts to rebuild while the test is running. *)
             system "/bin/ln -T %s %s" file (temp_dir ^/ link_as))
       in
       let () = Unix.chdir temp_dir in
