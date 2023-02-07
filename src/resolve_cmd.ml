@@ -134,4 +134,4 @@ open Cmdliner
 let cmd =
   let doc = "Try to automatically resolve conflicts due to code formatting" in
   ( Term.(const resolve $ Fmters.Flags.t $ Flags.echo $ const ())
-  , Term.info ~doc "merge-fmt" )
+  , Cmd.info ~doc "merge-fmt" )

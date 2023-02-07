@@ -3,31 +3,43 @@ NAME
        formatting
 
 SYNOPSIS
-       merge-fmt COMMAND ...
+       merge-fmt [COMMAND] …
 
 COMMANDS
-       mergetool
+       mergetool [OPTION]…
            git mergetool
 
-       setup-merge
+       setup-merge [--echo] [--merge-fmt-path=VAL] [--update] [OPTION]…
            Register the [merge-fmt] mergetool as the default merge driver in
            git
 
-       setup-mergetool
+       setup-mergetool [--echo] [--merge-fmt-path=VAL] [--update] [OPTION]…
            Register the [merge-fmt] mergetool in git
 
 OPTIONS
        --echo
            Echo all commands.
 
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of `auto',
-           `pager', `groff' or `plain'. With `auto', the format is `pager` or
-           `plain' whenever the TERM env var is `dumb' or undefined.
-
        --ocamlformat=VAL
            ocamlformat path
 
        --refmt=VAL
            refmt path
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+EXIT STATUS
+       merge-fmt exits with the following status:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
 
