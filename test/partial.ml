@@ -64,16 +64,15 @@ let x = 5
       system "git rebase branch2 -q";
       [%expect
         {|
-        error: Failed to merge in the changes.
-        Patch failed at 0001 second prime
-        Use 'git am --show-current-patch' to see the failed patch
-
-        Resolve all conflicts manually, mark them as resolved with
-        "git add/rm <conflicted_files>", then run "git rebase --continue".
-        You can instead skip this commit: run "git rebase --skip".
-        To abort and get back to the state before "git rebase", run "git rebase --abort".
-
-        Exit with 128 |}];
+        Auto-merging b.ml
+        CONFLICT (content): Merge conflict in b.ml
+        error: could not apply 48173d8... second prime
+        hint: Resolve all conflicts manually, mark them as resolved with
+        hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
+        hint: You can instead skip this commit: run "git rebase --skip".
+        hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
+        Could not apply 48173d8... second prime
+        Exit with 1 |}];
       print_status ();
       [%expect
         {|
@@ -90,7 +89,7 @@ let x = 5
           ; b : string
           ; c : float
           }
-        >>>>>>> second prime:a.ml
+        >>>>>>> 48173d8 (second prime):a.ml
 
         let y = 0
 
@@ -99,7 +98,7 @@ let x = 5
         let x = 1
         =======
         let x = 5
-        >>>>>>> second prime:a.ml |}];
+        >>>>>>> 48173d8 (second prime):a.ml |}];
       resolve ();
       print_status ();
       [%expect
@@ -171,4 +170,6 @@ let x = 5
       system "git add b.ml";
       [%expect {||}];
       system "git rebase --continue";
-      [%expect {||}])
+      [%expect {|
+        [detached HEAD 730f3dc] second prime
+         1 file changed, 10 insertions(+), 5 deletions(-) |}])

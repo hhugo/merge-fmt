@@ -69,16 +69,15 @@ type t =
       system "git rebase branch2 -q";
       [%expect
         {|
-        error: Failed to merge in the changes.
-        Patch failed at 0001 second commit (fork)
-        Use 'git am --show-current-patch' to see the failed patch
-
-        Resolve all conflicts manually, mark them as resolved with
-        "git add/rm <conflicted_files>", then run "git rebase --continue".
-        You can instead skip this commit: run "git rebase --skip".
-        To abort and get back to the state before "git rebase", run "git rebase --abort".
-
-        Exit with 128 |}];
+        Auto-merging b.ml
+        CONFLICT (content): Merge conflict in b.ml
+        error: could not apply 12ef546... second commit (fork)
+        hint: Resolve all conflicts manually, mark them as resolved with
+        hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
+        hint: You can instead skip this commit: run "git rebase --skip".
+        hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
+        Could not apply 12ef546... second commit (fork)
+        Exit with 1 |}];
       print_status ();
       [%expect
         {|
@@ -97,7 +96,7 @@ type t =
             ; b : string
             ; c : float
             }
-          >>>>>>> second commit (fork):a.ml |}];
+          >>>>>>> 12ef546 (second commit (fork)):a.ml |}];
       resolve ();
       print_status ();
       [%expect
@@ -117,16 +116,17 @@ type t =
       system "git rebase --continue";
       [%expect
         {|
-        error: Failed to merge in the changes.
-        Patch failed at 0002 third commit (fork)
-        Use 'git am --show-current-patch' to see the failed patch
-
-        Resolve all conflicts manually, mark them as resolved with
-        "git add/rm <conflicted_files>", then run "git rebase --continue".
-        You can instead skip this commit: run "git rebase --skip".
-        To abort and get back to the state before "git rebase", run "git rebase --abort".
-
-        Exit with 128 |}];
+        [detached HEAD 38f05c7] second commit (fork)
+         1 file changed, 9 insertions(+), 6 deletions(-)
+        Auto-merging b.ml
+        CONFLICT (content): Merge conflict in b.ml
+        error: could not apply 7e70a06... third commit (fork)
+        hint: Resolve all conflicts manually, mark them as resolved with
+        hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
+        hint: You can instead skip this commit: run "git rebase --skip".
+        hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
+        Could not apply 7e70a06... third commit (fork)
+        Exit with 1 |}];
       print_status ();
       [%expect
         {|
@@ -137,7 +137,7 @@ type t =
         type b = int
 
 
-        >>>>>>> third commit (fork):a.ml
+        >>>>>>> 7e70a06 (third commit (fork)):a.ml
         type t =
           { a : int option
           ; b : string
@@ -167,4 +167,6 @@ type t =
           | A
           | B of int |}];
       system "git rebase --continue";
-      [%expect {| |}])
+      [%expect {|
+        [detached HEAD d0f3d71] third commit (fork)
+         1 file changed, 2 insertions(+) |}])

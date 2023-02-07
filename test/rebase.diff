@@ -3,33 +3,44 @@
 >       print_status ();
 >       [%expect {|
 >         no changes |}];
-53c57
+40,41c44,46
+<         CONFLICT (modify/delete): a.ml deleted in HEAD and modified in 88f7eca (second commit (fork)).  Version 88f7eca (second commit (fork)) of a.ml left in tree.
+<         error: could not apply 88f7eca... second commit (fork)
+---
+>         Auto-merging b.ml
+>         CONFLICT (content): Merge conflict in b.ml
+>         error: could not apply 5c03ec7... second commit (fork)
+46c51
+<         Could not apply 88f7eca... second commit (fork)
+---
+>         Could not apply 5c03ec7... second commit (fork)
+51c56
 <         DU File a.ml
 ---
 >         UU File b.ml
-54a59,62
+52a58,61
 >         <<<<<<< HEAD
 >         type t = { a : int; b : string;
 >                    c : float; d : unit option }
 >         =======
-59c67,68
+57c66,67
 <           } |}];
 ---
 >           }
->         >>>>>>> second commit (fork) |}];
-61,64c70
+>         >>>>>>> 5c03ec7 (second commit (fork)) |}];
+59,62c69
 <       [%expect
 <         {|
 <         Ignore a.ml (not a 3-way merge)
 <         Exit with 1 |}];
 ---
 >       [%expect {| Resolved 1/1 b.ml |}];
-68,69c74
+66,67c73
 <         DU File a.ml
 < 
 ---
 >         M File b.ml
-71,73c76,79
+69,71c75,78
 <           { a : int option;
 <             b : string;
 <             c : float;
@@ -38,7 +49,7 @@
 >           ; b : string
 >           ; c : float
 >           ; d : unit option
-76,81c82
+74,79c81,83
 <       [%expect
 <         {|
 <         a.ml: needs merge
@@ -46,4 +57,6 @@
 <         mark them as resolved using git add
 <         Exit with 1 |}])
 ---
->       [%expect {| |}])
+>       [%expect {|
+>         [detached HEAD 82c7adb] second commit (fork)
+>          1 file changed, 6 insertions(+), 3 deletions(-) |}])

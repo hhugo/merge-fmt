@@ -38,18 +38,17 @@ type t =
       git_commit "second commit (fork)";
       git_branch "old_branch1";
       [%expect {| Switched to branch 'branch1' |}];
-      (* FIXME: we use the --apply backend explicitly. We should fix
-         the test to use the merge backend *)
-      system "git rebase branch2 -q --apply";
+      system "git rebase branch2 -q";
       [%expect
         {|
-        error: Failed to merge in the changes.
-        hint: Use 'git am --show-current-patch=diff' to see the failed patch
-        Patch failed at 0001 second commit (fork)
-        Resolve all conflicts manually, mark them as resolved with
-        "git add/rm <conflicted_files>", then run "git rebase --continue".
-        You can instead skip this commit: run "git rebase --skip".
-        To abort and get back to the state before "git rebase", run "git rebase --abort".
+        Auto-merging b.ml
+        CONFLICT (content): Merge conflict in b.ml
+        error: could not apply a93a935... second commit (fork)
+        hint: Resolve all conflicts manually, mark them as resolved with
+        hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
+        hint: You can instead skip this commit: run "git rebase --skip".
+        hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
+        Could not apply a93a935... second commit (fork)
         Exit with 1 |}];
       print_status ();
       [%expect
@@ -68,7 +67,7 @@ type t =
             b : string;
             c : float;
           }
-        >>>>>>> second commit (fork):a.ml |}];
+        >>>>>>> a93a935 (second commit (fork)):a.ml |}];
       resolve ();
       [%expect {| Resolved 1/1 b.ml |}];
       print_status ();
@@ -82,4 +81,6 @@ type t =
           ; d : unit option
           } |}];
       system "git rebase --continue";
-      [%expect {| Applying: second commit (fork) |}])
+      [%expect {|
+        [detached HEAD 0a0bd2c] second commit (fork)
+         1 file changed, 6 insertions(+), 6 deletions(-) |}])
