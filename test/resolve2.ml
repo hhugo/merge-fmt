@@ -38,19 +38,19 @@ type t =
       git_commit "second commit (fork)";
       git_branch "old_branch1";
       [%expect {| Switched to branch 'branch1' |}];
-      system "git rebase branch2 -q";
+      (* FIXME: we use the --apply backend explicitly. We should fix
+         the test to use the merge backend *)
+      system "git rebase branch2 -q --apply";
       [%expect
         {|
         error: Failed to merge in the changes.
+        hint: Use 'git am --show-current-patch=diff' to see the failed patch
         Patch failed at 0001 second commit (fork)
-        Use 'git am --show-current-patch' to see the failed patch
-
         Resolve all conflicts manually, mark them as resolved with
         "git add/rm <conflicted_files>", then run "git rebase --continue".
         You can instead skip this commit: run "git rebase --skip".
         To abort and get back to the state before "git rebase", run "git rebase --abort".
-
-        Exit with 128 |}];
+        Exit with 1 |}];
       print_status ();
       [%expect
         {|
@@ -82,4 +82,4 @@ type t =
           ; d : unit option
           } |}];
       system "git rebase --continue";
-      [%expect {| |}])
+      [%expect {| Applying: second commit (fork) |}])
