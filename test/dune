@@ -1,6 +1,6 @@
 (library
   (name merge_fmt_test)
-  (libraries base stdio unix expect_test_helpers)
+  (libraries base stdio unix expect_test_helpers_core core_unix core_unix.filename_unix)
   (inline_tests)
   (preprocessor_deps ../src/merge_fmt.exe)
   (preprocess (pps ppx_let ppx_expect)))

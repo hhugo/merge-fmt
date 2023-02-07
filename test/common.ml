@@ -1,14 +1,14 @@
 open! Base
 open! Stdio
-open! Core
 
+let ( ^/ ) = Stdlib.Filename.concat
 let echo = ref false
 
 let system fmt =
   Printf.ksprintf
     (fun s ->
       if !echo then eprintf "+ %s\n%!" s;
-      let p = Unix.system s in
+      let p = Core_unix.system s in
       match p with
       | Ok () -> ()
       | Error (`Signal _) -> printf "Signaled\n"
@@ -54,16 +54,16 @@ let git_init () =
 let merge_fmt =
   let current_dir = Unix.getcwd () in
   let tool = "../src/merge_fmt.exe" in
-  Filename.concat current_dir tool
+  Stdlib.Filename.concat current_dir tool
 
 let resolve () = system "%s" merge_fmt
 
 let with_temp_dir f =
   let in_dir = Sys.getenv "TMPDIR" in
   let keep_tmp_dir = Option.is_some (Sys.getenv "KEEP_EXPECT_TEST_DIR") in
-  let dir = Filename.temp_dir ?in_dir "expect-" "-test" in
+  let dir = Filename_unix.temp_dir ?in_dir "expect-" "-test" in
   (* Note that this blocks *)
-  assert (Filename.is_absolute dir);
+  assert (not (Stdlib.Filename.is_relative dir));
   let res = match f dir with x -> Ok x | exception e -> Error e in
   if keep_tmp_dir
   then eprintf "OUTPUT LEFT IN %s\n" dir
@@ -73,12 +73,13 @@ let with_temp_dir f =
 let within_temp_dir ?(links = []) f =
   let cwd = Unix.getcwd () in
   with_temp_dir (fun temp_dir ->
-      Unix.putenv ~key:"GIT_COMMITTER_DATE" ~data:"2019-01-01 00:00";
-      Unix.putenv ~key:"GIT_AUTHOR_DATE" ~data:"2019-01-01 00:00";
+      Core_unix.putenv ~key:"GIT_COMMITTER_DATE" ~data:"2019-01-01 00:00";
+      Core_unix.putenv ~key:"GIT_AUTHOR_DATE" ~data:"2019-01-01 00:00";
       let path_var = "PATH" in
       let old_path = Sys.getenv_exn path_var in
       let bin = temp_dir ^/ "bin" in
-      Unix.putenv ~key:path_var ~data:(String.concat ~sep:":" [ bin; old_path ]);
+      Core_unix.putenv ~key:path_var
+        ~data:(String.concat ~sep:":" [ bin; old_path ]);
       let () = system "mkdir %s" bin in
       let () =
         List.iter links ~f:(fun (file, action, link_as) ->
@@ -93,6 +94,6 @@ let within_temp_dir ?(links = []) f =
       in
       let () = Unix.chdir temp_dir in
       let res = match f () with x -> Ok x | exception e -> Error e in
-      Unix.putenv ~key:path_var ~data:old_path;
+      Core_unix.putenv ~key:path_var ~data:old_path;
       Unix.chdir cwd;
       Result.ok_exn res)
