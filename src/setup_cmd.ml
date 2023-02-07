@@ -31,8 +31,10 @@ let mergetool =
     Arg.(value & flag & info [ "update" ] ~doc)
   in
   let doc = "Register the [merge-fmt] mergetool in git" in
-  ( Term.(const setup $ update_git_config $ Flags.echo $ merge_fmt_path)
-  , Term.info ~doc "setup-mergetool" )
+  let term =
+    Term.(const setup $ update_git_config $ Flags.echo $ merge_fmt_path)
+  in
+  Cmd.v (Cmd.info ~doc "setup-mergetool") term
 
 let merge =
   let setup update_git_config echo merge_fmt_path =
@@ -67,5 +69,7 @@ let merge =
   let doc =
     "Register the [merge-fmt] mergetool as the default merge driver in git"
   in
-  ( Term.(const setup $ update_git_config $ Flags.echo $ merge_fmt_path)
-  , Term.info ~doc "setup-merge" )
+  let term =
+    Term.(const setup $ update_git_config $ Flags.echo $ merge_fmt_path)
+  in
+  Cmd.v (Cmd.info ~doc "setup-merge") term

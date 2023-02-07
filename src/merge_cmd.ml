@@ -73,7 +73,9 @@ let cmd =
       value & opt (some file) None & info [ "name" ] ~docv:"<result-name>" ~doc)
   in
   let doc = "git mergetool" in
-  ( Term.(
+  let term =
+    Term.(
       const merge $ Fmters.Flags.t $ Flags.echo $ current $ base $ other
       $ output $ result_name)
-  , Term.info ~doc "mergetool" )
+  in
+  Cmd.v (Cmd.info ~doc "mergetool") term
