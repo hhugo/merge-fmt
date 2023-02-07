@@ -41,16 +41,15 @@ type t =
       system "git rebase branch2 -q";
       [%expect
         {|
-        error: Failed to merge in the changes.
-        Patch failed at 0001 second commit (fork)
-        Use 'git am --show-current-patch' to see the failed patch
-
-        Resolve all conflicts manually, mark them as resolved with
-        "git add/rm <conflicted_files>", then run "git rebase --continue".
-        You can instead skip this commit: run "git rebase --skip".
-        To abort and get back to the state before "git rebase", run "git rebase --abort".
-
-        Exit with 128 |}];
+        Auto-merging b.ml
+        CONFLICT (content): Merge conflict in b.ml
+        error: could not apply 5c03ec7... second commit (fork)
+        hint: Resolve all conflicts manually, mark them as resolved with
+        hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
+        hint: You can instead skip this commit: run "git rebase --skip".
+        hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
+        Could not apply 5c03ec7... second commit (fork)
+        Exit with 1 |}];
       print_status ();
       [%expect
         {|
@@ -65,7 +64,7 @@ type t =
             b : string;
             c : float;
           }
-        >>>>>>> second commit (fork) |}];
+        >>>>>>> 5c03ec7 (second commit (fork)) |}];
       resolve ();
       [%expect {| Resolved 1/1 b.ml |}];
       print_status ();
@@ -79,4 +78,6 @@ type t =
           ; d : unit option
           } |}];
       system "git rebase --continue";
-      [%expect {| |}])
+      [%expect {|
+        [detached HEAD 82c7adb] second commit (fork)
+         1 file changed, 6 insertions(+), 3 deletions(-) |}])

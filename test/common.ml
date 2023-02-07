@@ -75,6 +75,7 @@ let within_temp_dir ?(links = []) f =
   with_temp_dir (fun temp_dir ->
       Core_unix.putenv ~key:"GIT_COMMITTER_DATE" ~data:"2019-01-01 00:00";
       Core_unix.putenv ~key:"GIT_AUTHOR_DATE" ~data:"2019-01-01 00:00";
+      Core_unix.putenv ~key:"GIT_EDITOR" ~data:"true";
       let path_var = "PATH" in
       let old_path = Sys.getenv_exn path_var in
       let bin = temp_dir ^/ "bin" in
