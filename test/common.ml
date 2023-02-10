@@ -73,7 +73,17 @@ let with_temp_dir f =
 let within_temp_dir ?(links = []) f =
   let cwd = Unix.getcwd () in
   with_temp_dir (fun temp_dir ->
+      (* disable all external git configuration configuration *)
+      Core_unix.putenv ~key:"GIT_CONFIG_NOSYSTEM" ~data:"1";
+      Core_unix.putenv ~key:"GIT_CONFIG" ~data:"/dev/null";
+      Core_unix.putenv ~key:"HOME" ~data:"/dev/null";
+      Core_unix.putenv ~key:"XDG_CONFIG_HOME" ~data:"/dev/null";
+
+      Core_unix.putenv ~key:"GIT_COMMITTER_NAME" ~data:"John Doe";
       Core_unix.putenv ~key:"GIT_COMMITTER_DATE" ~data:"2019-01-01 00:00";
+      Core_unix.putenv ~key:"GIT_COMMITTER_EMAIL" ~data:"johndoe@doe.com";
+      Core_unix.putenv ~key:"GIT_AUTHOR_NAME" ~data:"John Doe";
+      Core_unix.putenv ~key:"GIT_AUTHOR_EMAIL" ~data:"johndoe@doe.com";
       Core_unix.putenv ~key:"GIT_AUTHOR_DATE" ~data:"2019-01-01 00:00";
       Core_unix.putenv ~key:"GIT_EDITOR" ~data:"true";
       let path_var = "PATH" in
