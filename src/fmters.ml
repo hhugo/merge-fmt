@@ -4,6 +4,7 @@ open Common
 type config =
   { ocamlformat_path : string option
   ; refmt_path : string option
+  ; dune_path : string option
   }
 
 type t = string
@@ -15,12 +16,20 @@ let ocamlformat ~bin ~name =
 
 let refmt ~bin = sprintf "%s --inplace" (Option.value ~default:"refmt" bin)
 
+let dune ~bin ~filename =
+  (* redirection as format-dune-file doesn't have an inplace option *)
+  sprintf "%s format-dune-file -- %s > "
+    (Option.value ~default:"dune" bin)
+    filename
+
 let find ~config ~filename ~name =
   let filename = Option.value ~default:filename name in
-  match (Caml.Filename.extension filename, config) with
-  | (".ml" | ".mli"), { ocamlformat_path; _ } ->
+  match (filename, Caml.Filename.extension filename, config) with
+  | _, (".ml" | ".mli"), { ocamlformat_path; _ } ->
       Some (ocamlformat ~bin:ocamlformat_path ~name)
-  | (".re" | ".rei"), { refmt_path; _ } -> Some (refmt ~bin:refmt_path)
+  | _, (".re" | ".rei"), { refmt_path; _ } -> Some (refmt ~bin:refmt_path)
+  | ("dune" | "dune-project" | "dune-workspace"), "", { dune_path; _ } ->
+      Some (dune ~bin:dune_path ~filename)
   | _ -> None
 
 let run t ~echo ~filename = system ~echo "%s %s" t filename
@@ -36,9 +45,13 @@ module Flags = struct
     let doc = "refmt path" in
     Arg.(value & opt (some string) None & info [ "refmt" ] ~doc)
 
+  let dune_path =
+    let doc = "dune path" in
+    Arg.(value & opt (some string) None & info [ "dune" ] ~doc)
+
   let t =
     Term.(
-      const (fun ocamlformat_path refmt_path ->
-          { ocamlformat_path; refmt_path })
-      $ ocamlformat_path $ refmt_path)
+      const (fun ocamlformat_path refmt_path dune_path ->
+          { ocamlformat_path; refmt_path; dune_path })
+      $ ocamlformat_path $ refmt_path $ dune_path)
 end

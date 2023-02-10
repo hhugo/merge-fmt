@@ -9,6 +9,9 @@ OPTIONS
 
        --current=<current-file>
 
+       --dune=VAL
+           dune path
+
        --echo
            Echo all commands.
 
