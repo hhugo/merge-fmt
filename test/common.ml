@@ -72,6 +72,7 @@ let with_temp_dir f =
 
 let within_temp_dir ?(links = []) f =
   let cwd = Unix.getcwd () in
+  let (_ : int) = Unix.umask 0o077 in
   with_temp_dir (fun temp_dir ->
       (* disable all external git configuration configuration *)
       Core_unix.putenv ~key:"GIT_CONFIG_NOSYSTEM" ~data:"1";
@@ -82,11 +83,12 @@ let within_temp_dir ?(links = []) f =
       Core_unix.unsetenv "XDG_CONFIG_HOME";
 
       Core_unix.putenv ~key:"GIT_COMMITTER_NAME" ~data:"John Doe";
-      Core_unix.putenv ~key:"GIT_COMMITTER_DATE" ~data:"2019-01-01 00:00";
+      Core_unix.putenv ~key:"GIT_COMMITTER_DATE"
+        ~data:"2020-12-03 19:00:00 +0000";
       Core_unix.putenv ~key:"GIT_COMMITTER_EMAIL" ~data:"johndoe@doe.com";
       Core_unix.putenv ~key:"GIT_AUTHOR_NAME" ~data:"John Doe";
       Core_unix.putenv ~key:"GIT_AUTHOR_EMAIL" ~data:"johndoe@doe.com";
-      Core_unix.putenv ~key:"GIT_AUTHOR_DATE" ~data:"2019-01-01 00:00";
+      Core_unix.putenv ~key:"GIT_AUTHOR_DATE" ~data:"2020-12-03 19:00:00 +0000";
       Core_unix.putenv ~key:"GIT_EDITOR" ~data:"true";
       let path_var = "PATH" in
       let old_path = Sys.getenv_exn path_var in
@@ -110,3 +112,62 @@ let within_temp_dir ?(links = []) f =
       Core_unix.putenv ~key:path_var ~data:old_path;
       Unix.chdir cwd;
       Result.ok_exn res)
+
+let%expect_test _ =
+  within_temp_dir (fun () ->
+      git_init ();
+      system "git config -l";
+      [%expect
+        {|
+        core.repositoryformatversion=0
+        core.filemode=true
+        core.bare=false
+        core.logallrefupdates=true |}];
+      system "git show --format=raw HEAD";
+      [%expect
+        {|
+        commit 4de0f8c2fa140c9b4cf667864af6fb76afae0206
+        tree 90f548f11622b8462d718dfa8a6b5749c67145e7
+        author John Doe <johndoe@doe.com> 1607022000 +0000
+        committer John Doe <johndoe@doe.com> 1607022000 +0000
+
+            initial
+
+        diff --git a/.ocamlformat b/.ocamlformat
+        new file mode 100644
+        index 0000000..fa4af5a
+        --- /dev/null
+        +++ b/.ocamlformat
+        @@ -0,0 +1 @@
+        +profile=janestreet
+        \ No newline at end of file |}];
+      write "a.ml"
+        {|
+type t = { a : int;
+           b : string;
+           c : float;
+         }
+|};
+      git_commit "first commit";
+      system "git show --format=raw HEAD";
+      [%expect
+        {|
+        commit 2a7a47ddd1c03d9e88ab56eac01765014c53b2de
+        tree c274a479e323ccf6b8b06ed2984b8147f56ca87c
+        parent 4de0f8c2fa140c9b4cf667864af6fb76afae0206
+        author John Doe <johndoe@doe.com> 1607022000 +0000
+        committer John Doe <johndoe@doe.com> 1607022000 +0000
+
+            first commit
+
+        diff --git a/a.ml b/a.ml
+        new file mode 100644
+        index 0000000..648ba45
+        --- /dev/null
+        +++ b/a.ml
+        @@ -0,0 +1,5 @@
+        +
+        +type t = { a : int;
+        +           b : string;
+        +           c : float;
+        +         } |}])

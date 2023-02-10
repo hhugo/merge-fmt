@@ -76,12 +76,12 @@ type t =
         {|
         Auto-merging b.ml
         CONFLICT (content): Merge conflict in b.ml
-        error: could not apply ac9f205... second commit (fork)
+        error: could not apply 6499b96... second commit (fork)
         hint: Resolve all conflicts manually, mark them as resolved with
         hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
         hint: You can instead skip this commit: run "git rebase --skip".
         hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
-        Could not apply ac9f205... second commit (fork)
+        Could not apply 6499b96... second commit (fork)
         Exit with 1 |}];
       print_file "b.ml";
       [%expect
@@ -101,7 +101,7 @@ type t =
             ; b : string
             ; c : float
             }
-          >>>>>>> ac9f205 (second commit (fork)):a.ml |}])
+          >>>>>>> 6499b96 (second commit (fork)):a.ml |}])
 
 let%expect_test "custom merge tool" =
   within_temp_dir (fun () ->
