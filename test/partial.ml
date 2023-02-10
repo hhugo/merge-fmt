@@ -66,12 +66,12 @@ let x = 5
         {|
         Auto-merging b.ml
         CONFLICT (content): Merge conflict in b.ml
-        error: could not apply 8330ba8... second prime
+        error: could not apply 10b6b8e... second prime
         hint: Resolve all conflicts manually, mark them as resolved with
         hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
         hint: You can instead skip this commit: run "git rebase --skip".
         hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
-        Could not apply 8330ba8... second prime
+        Could not apply 10b6b8e... second prime
         Exit with 1 |}];
       print_status ();
       [%expect
@@ -89,7 +89,7 @@ let x = 5
           ; b : string
           ; c : float
           }
-        >>>>>>> 8330ba8 (second prime):a.ml
+        >>>>>>> 10b6b8e (second prime):a.ml
 
         let y = 0
 
@@ -98,7 +98,7 @@ let x = 5
         let x = 1
         =======
         let x = 5
-        >>>>>>> 8330ba8 (second prime):a.ml |}];
+        >>>>>>> 10b6b8e (second prime):a.ml |}];
       resolve ();
       print_status ();
       [%expect
@@ -172,5 +172,5 @@ let x = 5
       system "git rebase --continue";
       [%expect
         {|
-        [detached HEAD 6adfc81] second prime
+        [detached HEAD 7627cfc] second prime
          1 file changed, 10 insertions(+), 5 deletions(-) |}])

@@ -43,12 +43,12 @@ type t =
         {|
         Auto-merging b.ml
         CONFLICT (content): Merge conflict in b.ml
-        error: could not apply b7287b5... second commit (fork)
+        error: could not apply 6070a8f... second commit (fork)
         hint: Resolve all conflicts manually, mark them as resolved with
         hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
         hint: You can instead skip this commit: run "git rebase --skip".
         hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
-        Could not apply b7287b5... second commit (fork)
+        Could not apply 6070a8f... second commit (fork)
         Exit with 1 |}];
       print_status ();
       [%expect
@@ -64,7 +64,7 @@ type t =
             b : string;
             c : float;
           }
-        >>>>>>> b7287b5 (second commit (fork)) |}];
+        >>>>>>> 6070a8f (second commit (fork)) |}];
       resolve ();
       [%expect {| Resolved 1/1 b.ml |}];
       print_status ();
@@ -80,5 +80,5 @@ type t =
       system "git rebase --continue";
       [%expect
         {|
-        [detached HEAD 02057b4] second commit (fork)
+        [detached HEAD b70d467] second commit (fork)
          1 file changed, 6 insertions(+), 3 deletions(-) |}])
