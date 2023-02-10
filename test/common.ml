@@ -75,9 +75,11 @@ let within_temp_dir ?(links = []) f =
   with_temp_dir (fun temp_dir ->
       (* disable all external git configuration configuration *)
       Core_unix.putenv ~key:"GIT_CONFIG_NOSYSTEM" ~data:"1";
-      Core_unix.putenv ~key:"GIT_CONFIG" ~data:"/dev/null";
-      Core_unix.putenv ~key:"HOME" ~data:"/dev/null";
-      Core_unix.putenv ~key:"XDG_CONFIG_HOME" ~data:"/dev/null";
+      Core_unix.putenv ~key:"GIT_CONFIG_NOGLOBAL" ~data:"1";
+
+      Core_unix.unsetenv "GIT_CONFIG";
+      Core_unix.unsetenv "HOME";
+      Core_unix.unsetenv "XDG_CONFIG_HOME";
 
       Core_unix.putenv ~key:"GIT_COMMITTER_NAME" ~data:"John Doe";
       Core_unix.putenv ~key:"GIT_COMMITTER_DATE" ~data:"2019-01-01 00:00";
