@@ -76,12 +76,12 @@ type t =
         {|
         Auto-merging b.ml
         CONFLICT (content): Merge conflict in b.ml
-        error: could not apply 12ef546... second commit (fork)
+        error: could not apply ac9f205... second commit (fork)
         hint: Resolve all conflicts manually, mark them as resolved with
         hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
         hint: You can instead skip this commit: run "git rebase --skip".
         hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
-        Could not apply 12ef546... second commit (fork)
+        Could not apply ac9f205... second commit (fork)
         Exit with 1 |}];
       print_status ();
       [%expect
@@ -101,7 +101,7 @@ type t =
             ; b : string
             ; c : float
             }
-          >>>>>>> 12ef546 (second commit (fork)):a.ml |}];
+          >>>>>>> ac9f205 (second commit (fork)):a.ml |}];
       system "git mergetool --tool mergefmt -y";
       system "git clean -f";
       [%expect
@@ -130,16 +130,16 @@ type t =
       system "git rebase --continue";
       [%expect
         {|
-        [detached HEAD 38f05c7] second commit (fork)
+        [detached HEAD 6a9624f] second commit (fork)
          1 file changed, 9 insertions(+), 6 deletions(-)
         Auto-merging b.ml
         CONFLICT (content): Merge conflict in b.ml
-        error: could not apply 7e70a06... third commit (fork)
+        error: could not apply 35725a2... third commit (fork)
         hint: Resolve all conflicts manually, mark them as resolved with
         hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
         hint: You can instead skip this commit: run "git rebase --skip".
         hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
-        Could not apply 7e70a06... third commit (fork)
+        Could not apply 35725a2... third commit (fork)
         Exit with 1 |}];
       print_status ();
       [%expect
@@ -151,7 +151,7 @@ type t =
         type b = int
 
 
-        >>>>>>> 7e70a06 (third commit (fork)):a.ml
+        >>>>>>> 35725a2 (third commit (fork)):a.ml
         type t =
           { a : int option
           ; b : string
@@ -190,6 +190,7 @@ type t =
           | A
           | B of int |}];
       system "git rebase --continue";
-      [%expect {|
-        [detached HEAD d0f3d71] third commit (fork)
+      [%expect
+        {|
+        [detached HEAD 392acaf] third commit (fork)
          1 file changed, 2 insertions(+) |}])
