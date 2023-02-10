@@ -4,16 +4,16 @@
 >       [%expect {|
 >         no changes |}];
 40,41c44,46
-<         CONFLICT (modify/delete): a.ml deleted in HEAD and modified in 88f7eca (second commit (fork)).  Version 88f7eca (second commit (fork)) of a.ml left in tree.
-<         error: could not apply 88f7eca... second commit (fork)
+<         CONFLICT (modify/delete): a.ml deleted in HEAD and modified in 790c947 (second commit (fork)).  Version 790c947 (second commit (fork)) of a.ml left in tree.
+<         error: could not apply 790c947... second commit (fork)
 ---
 >         Auto-merging b.ml
 >         CONFLICT (content): Merge conflict in b.ml
->         error: could not apply 5c03ec7... second commit (fork)
+>         error: could not apply b7287b5... second commit (fork)
 46c51
-<         Could not apply 88f7eca... second commit (fork)
+<         Could not apply 790c947... second commit (fork)
 ---
->         Could not apply 5c03ec7... second commit (fork)
+>         Could not apply b7287b5... second commit (fork)
 51c56
 <         DU File a.ml
 ---
@@ -27,7 +27,7 @@
 <           } |}];
 ---
 >           }
->         >>>>>>> 5c03ec7 (second commit (fork)) |}];
+>         >>>>>>> b7287b5 (second commit (fork)) |}];
 59,62c69
 <       [%expect
 <         {|
@@ -49,14 +49,11 @@
 >           ; b : string
 >           ; c : float
 >           ; d : unit option
-74,79c81,83
-<       [%expect
-<         {|
+76,79c83,84
 <         a.ml: needs merge
 <         You must edit all merge conflicts and then
 <         mark them as resolved using git add
 <         Exit with 1 |}])
 ---
->       [%expect {|
->         [detached HEAD 82c7adb] second commit (fork)
+>         [detached HEAD 02057b4] second commit (fork)
 >          1 file changed, 6 insertions(+), 3 deletions(-) |}])

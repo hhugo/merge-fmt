@@ -37,13 +37,13 @@ type t =
       system "git rebase branch2 -q";
       [%expect
         {|
-        CONFLICT (modify/delete): a.ml deleted in HEAD and modified in 88f7eca (second commit (fork)).  Version 88f7eca (second commit (fork)) of a.ml left in tree.
-        error: could not apply 88f7eca... second commit (fork)
+        CONFLICT (modify/delete): a.ml deleted in HEAD and modified in 790c947 (second commit (fork)).  Version 790c947 (second commit (fork)) of a.ml left in tree.
+        error: could not apply 790c947... second commit (fork)
         hint: Resolve all conflicts manually, mark them as resolved with
         hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
         hint: You can instead skip this commit: run "git rebase --skip".
         hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
-        Could not apply 88f7eca... second commit (fork)
+        Could not apply 790c947... second commit (fork)
         Exit with 1 |}];
       print_status ();
       [%expect
