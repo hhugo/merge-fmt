@@ -16,11 +16,11 @@ let ocamlformat ~bin ~name =
 
 let refmt ~bin = sprintf "%s --inplace" (Option.value ~default:"refmt" bin)
 
-let dune ~bin ~filename =
+let dune ~bin =
   (* redirection as format-dune-file doesn't have an inplace option *)
-  sprintf "%s format-dune-file -- %s > "
+  sprintf
+    {|sp() { tmpf=$(mktemp); cat > "$tmpf"; mv "$tmpf" "$1"; }; dfmt() { %s format-dune-file "$1" | sp "$1"; }; dfmt|}
     (Option.value ~default:"dune" bin)
-    filename
 
 let find ~config ~filename ~name =
   let filename = Option.value ~default:filename name in
@@ -29,7 +29,7 @@ let find ~config ~filename ~name =
       Some (ocamlformat ~bin:ocamlformat_path ~name)
   | _, (".re" | ".rei"), { refmt_path; _ } -> Some (refmt ~bin:refmt_path)
   | ("dune" | "dune-project" | "dune-workspace"), "", { dune_path; _ } ->
-      Some (dune ~bin:dune_path ~filename)
+      Some (dune ~bin:dune_path)
   | _ -> None
 
 let run t ~echo ~filename = system ~echo "%s %s" t filename

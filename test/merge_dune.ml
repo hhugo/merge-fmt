@@ -50,14 +50,14 @@ let%expect_test "default merge tool" =
 
       write "dune"
         {|
-(executable
- (name bbbb)
- (libraries unix))
-
 (alias
  (name runtest)
  (action
   (diff rebase.diff rebase.diff.gen)))
+
+(executable
+ (name bbbb)
+ (libraries unix))
 |};
 
       git_commit "third commit (fork)";
@@ -142,14 +142,14 @@ let%expect_test "custom merge tool" =
 
       write "dune"
         {|
-(executable
- (name bbbb)
- (libraries unix))
-
 (alias
  (name runtest)
  (action
   (diff rebase.diff rebase.diff.gen)))
+
+(executable
+ (name bbbb)
+ (libraries unix))
 |};
       git_commit "third commit (fork)";
       git_branch "old_branch1";
@@ -157,7 +157,15 @@ let%expect_test "custom merge tool" =
       system "git rebase branch2 -q";
       [%expect
         {|
-        dropping a5a03b549f1159aac7629b550009dab46c7a42e0 third commit (fork) -- patch contents already upstream |}];
+        Auto-merging dune
+        CONFLICT (content): Merge conflict in dune
+        error: could not apply 2e00bc1... second commit (fork)
+        hint: Resolve all conflicts manually, mark them as resolved with
+        hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
+        hint: You can instead skip this commit: run "git rebase --skip".
+        hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
+        Could not apply 2e00bc1... second commit (fork)
+        Exit with 1 |}];
       print_file "dune";
       [%expect
         {|
