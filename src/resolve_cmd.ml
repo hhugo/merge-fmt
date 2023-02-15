@@ -67,8 +67,10 @@ let show ~echo version versions =
 
 let create_tmp ~echo fn version versions =
   let content = show ~echo version versions in
-  let ext = Caml.Filename.extension fn
-  and base = Caml.Filename.chop_extension fn in
+  let ext = Caml.Filename.extension fn in
+  let base =
+    if String.equal ext "" then fn else Caml.Filename.chop_extension fn
+  in
   let fn' = sprintf "%s.%s%s" base (string_of_version version) ext in
   let oc = Out_channel.create fn' in
   Out_channel.output_string oc content;
