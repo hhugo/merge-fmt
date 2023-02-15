@@ -66,7 +66,8 @@ type t =
           }
         >>>>>>> 6070a8f (second commit (fork)) |}];
       resolve ();
-      [%expect {| Resolved 1/1 b.ml |}];
+      [%expect {|
+        Resolved 1/1 b.ml |}];
       print_status ();
       [%expect
         {|

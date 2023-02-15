@@ -69,7 +69,8 @@ type t =
           }
         >>>>>>> ead71ee (second commit (fork)):a.ml |}];
       resolve ();
-      [%expect {| Resolved 1/1 b.ml |}];
+      [%expect {|
+        Resolved 1/1 b.ml |}];
       print_status ();
       [%expect
         {|

@@ -125,7 +125,9 @@ let resolve config echo () =
                 ~f:(fun () -> git_add ~echo ~filename)
               |> (ignore : (unit, unit) Result.t -> unit);
               let n2 = conflict ~filename in
-              eprintf "Resolved %d/%d %s\n%!" (n1 - n2) n1 filename
+              if n2 > n1
+              then eprintf "Resolved ?? %s\n%!" filename
+              else eprintf "Resolved %d/%d %s\n%!" (n1 - n2) n1 filename
           | None -> eprintf "Ignore %s (no formatter register)\n%!" filename)
       | Error reason -> eprintf "Ignore %s (%s)\n%!" filename reason);
   let all = ls ~echo () in

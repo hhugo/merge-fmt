@@ -166,14 +166,22 @@ let%expect_test "custom merge tool" =
         hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
         Could not apply 2e00bc1... second commit (fork)
         Exit with 1 |}];
+      system "%s" merge_fmt;
       print_file "dune";
       [%expect
         {|
+        Resolved -1/0 dune
+        Exit with 1
         File dune
         (executable
+        <<<<<<< dune.ours
          (name aaaa)
          (libraries unix)
          (public_name pppp))
 
         (library
-         (name liblib)) |}])
+         (name liblib))
+        =======
+         (name bbbb)
+         (libraries unix))
+        >>>>>>> dune.theirs |}])
