@@ -156,8 +156,7 @@ let%expect_test "custom merge tool" =
       git_branch "old_branch1";
 
       system "git rebase branch2 -q";
-      [%expect
-        {| |}];
+      [%expect {| |}];
       system "%s" merge_fmt;
       print_file "dune";
       [%expect
