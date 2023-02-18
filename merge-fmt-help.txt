@@ -17,6 +17,9 @@ COMMANDS
            Register the [merge-fmt] mergetool in git
 
 OPTIONS
+       --dune=VAL
+           dune path
+
        --echo
            Echo all commands.
 

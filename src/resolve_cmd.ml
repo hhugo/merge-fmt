@@ -67,8 +67,10 @@ let show ~echo version versions =
 
 let create_tmp ~echo fn version versions =
   let content = show ~echo version versions in
-  let ext = Caml.Filename.extension fn
-  and base = Caml.Filename.chop_extension fn in
+  let ext = Caml.Filename.extension fn in
+  let base =
+    if String.equal ext "" then fn else Caml.Filename.chop_extension fn
+  in
   let fn' = sprintf "%s.%s%s" base (string_of_version version) ext in
   let oc = Out_channel.create fn' in
   Out_channel.output_string oc content;
@@ -123,7 +125,9 @@ let resolve config echo () =
                 ~f:(fun () -> git_add ~echo ~filename)
               |> (ignore : (unit, unit) Result.t -> unit);
               let n2 = conflict ~filename in
-              eprintf "Resolved %d/%d %s\n%!" (n1 - n2) n1 filename
+              if n2 > n1
+              then eprintf "Resolved ?? %s\n%!" filename
+              else eprintf "Resolved %d/%d %s\n%!" (n1 - n2) n1 filename
           | None -> eprintf "Ignore %s (no formatter register)\n%!" filename)
       | Error reason -> eprintf "Ignore %s (%s)\n%!" filename reason);
   let all = ls ~echo () in

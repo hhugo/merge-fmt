@@ -9,6 +9,7 @@ code formatters.
 `merge-fmt` currently only knows about the following formatters:
 - [ocamlformat](https://github.com/ocaml-ppx/ocamlformat) for OCaml.
 - [refmt](https://github.com/facebook/reason) for reason.
+- [dune](https://github.com/ocaml/dune) for dune.
 
 Note that supporting new code formatters is trivial.
 

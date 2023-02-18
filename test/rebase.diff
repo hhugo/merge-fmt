@@ -28,19 +28,20 @@
 ---
 >           }
 >         >>>>>>> 6070a8f (second commit (fork)) |}];
-59,62c69
+59,62c69,70
 <       [%expect
 <         {|
 <         Ignore a.ml (not a 3-way merge)
 <         Exit with 1 |}];
 ---
->       [%expect {| Resolved 1/1 b.ml |}];
-66,67c73
+>       [%expect {|
+>         Resolved 1/1 b.ml |}];
+66,67c74
 <         DU File a.ml
 < 
 ---
 >         M File b.ml
-69,71c75,78
+69,71c76,79
 <           { a : int option;
 <             b : string;
 <             c : float;
@@ -49,7 +50,7 @@
 >           ; b : string
 >           ; c : float
 >           ; d : unit option
-76,79c83,84
+76,79c84,85
 <         a.ml: needs merge
 <         You must edit all merge conflicts and then
 <         mark them as resolved using git add
