@@ -36,7 +36,7 @@ COMMON OPTIONS
            whenever the TERM env var is dumb or undefined.
 
 EXIT STATUS
-       merge-fmt exits with the following status:
+       merge-fmt exits with:
 
        0   on success.
 

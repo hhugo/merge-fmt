@@ -23,7 +23,7 @@ COMMON OPTIONS
            whenever the TERM env var is dumb or undefined.
 
 EXIT STATUS
-       setup-mergetool exits with the following status:
+       merge-fmt setup-mergetool exits with:
 
        0   on success.
 
