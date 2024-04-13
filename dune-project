@@ -1,3 +1,2 @@
-(lang dune 1.6)
-(using fmt 1.0)
+(lang dune 3.0)
 (name merge-fmt)

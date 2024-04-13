@@ -12,6 +12,6 @@
   (targets rebase.diff.gen)
   (action (with-stdout-to %{targets} (bash "diff %{dep:rebase_a.ml} %{dep:rebase_b.ml} || true"))))
 
-(alias
-  (name runtest)
+(rule
+  (alias runtest)
   (action (diff rebase.diff rebase.diff.gen)))
