@@ -5,7 +5,7 @@ open Common
 let debug_oc =
   lazy
     (Out_channel.create ~append:true
-       (Filename.concat (Filename.get_temp_dir_name ()) "merge-fmt.log"))
+       (Stdlib.Filename.concat (Stdlib.Filename.get_temp_dir_name ()) "merge-fmt.log"))
 
 let debug fmt =
   if true
@@ -15,7 +15,7 @@ let debug fmt =
 let merge config echo current base other output name =
   match (current, base, other) with
   | (None | Some ""), _, _ | _, (None | Some ""), _ | _, _, (None | Some "") ->
-      Caml.exit 1
+      Stdlib.exit 1
   | Some current, Some base, Some other -> (
       match Fmters.find ~config ~filename:current ~name with
       | None ->
@@ -33,7 +33,7 @@ let merge config echo current base other output name =
             |> Result.map_error ~f:(Fn.const "base")
           in
           match Result.combine_errors [ x; y; z ] with
-          | Error _ -> Caml.exit 1
+          | Error _ -> Stdlib.exit 1
           | Ok (_ : unit list) ->
               debug "process all three revision successfully\n%!";
               debug "running git merge-file\n%!";
@@ -44,7 +44,7 @@ let merge config echo current base other output name =
               (match output with
               | None -> Out_channel.output_string stdout result
               | Some o -> Out_channel.write_all o ~data:result);
-              Caml.exit 0))
+              Stdlib.exit 0))
 
 open Cmdliner
 

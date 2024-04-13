@@ -67,9 +67,9 @@ let show ~echo version versions =
 
 let create_tmp ~echo fn version versions =
   let content = show ~echo version versions in
-  let ext = Caml.Filename.extension fn in
+  let ext = Stdlib.Filename.extension fn in
   let base =
-    if String.equal ext "" then fn else Caml.Filename.chop_extension fn
+    if String.equal ext "" then fn else Stdlib.Filename.chop_extension fn
   in
   let fn' = sprintf "%s.%s%s" base (string_of_version version) ext in
   let oc = Out_channel.create fn' in
@@ -114,7 +114,7 @@ let resolve config echo () =
   if Map.is_empty all
   then (
     eprintf "Nothing to resolve\n%!";
-    Caml.exit 1);
+    Stdlib.exit 1);
   Map.iteri all ~f:(fun ~key:filename ~data:versions ->
       match versions with
       | Ok versions -> (
@@ -131,7 +131,7 @@ let resolve config echo () =
           | None -> eprintf "Ignore %s (no formatter register)\n%!" filename)
       | Error reason -> eprintf "Ignore %s (%s)\n%!" filename reason);
   let all = ls ~echo () in
-  if Map.is_empty all then Caml.exit 0 else Caml.exit 1
+  if Map.is_empty all then Stdlib.exit 0 else Stdlib.exit 1
 
 open Cmdliner
 
