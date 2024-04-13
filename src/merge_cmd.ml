@@ -5,7 +5,9 @@ open Common
 let debug_oc =
   lazy
     (Out_channel.create ~append:true
-       (Stdlib.Filename.concat (Stdlib.Filename.get_temp_dir_name ()) "merge-fmt.log"))
+       (Stdlib.Filename.concat
+          (Stdlib.Filename.get_temp_dir_name ())
+          "merge-fmt.log"))
 
 let debug fmt =
   if true
