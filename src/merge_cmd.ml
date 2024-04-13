@@ -2,7 +2,10 @@ open Base
 open Stdio
 open Common
 
-let debug_oc = lazy (Out_channel.create ~append:true "/tmp/merge-fmt.log")
+let debug_oc =
+  lazy
+    (Out_channel.create ~append:true
+       (Filename.concat (Filename.get_temp_dir_name ()) "merge-fmt.log"))
 
 let debug fmt =
   if true
