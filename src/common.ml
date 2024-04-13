@@ -18,8 +18,8 @@ let open_process_in_respect_exit ~echo fmt =
       let contents = In_channel.input_all ic in
       match Unix.close_process_in ic with
       | WEXITED 0 -> contents
-      | WEXITED n -> Caml.exit n
-      | WSIGNALED _ | WSTOPPED _ -> Caml.exit 1)
+      | WEXITED n -> Stdlib.exit n
+      | WSIGNALED _ | WSTOPPED _ -> Stdlib.exit 1)
     fmt
 
 let system ~echo fmt =
@@ -35,8 +35,8 @@ let system_respect_exit ~echo fmt =
       if echo then eprintf "+ %s\n%!" s;
       match Unix.system s with
       | WEXITED 0 -> ()
-      | WEXITED n -> Caml.exit n
-      | WSIGNALED _ | WSTOPPED _ -> Caml.exit 1)
+      | WEXITED n -> Stdlib.exit n
+      | WSIGNALED _ | WSTOPPED _ -> Stdlib.exit 1)
     fmt
 
 module Flags = struct

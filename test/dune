@@ -1,17 +1,22 @@
 (library
-  (name merge_fmt_test)
-  (libraries base stdio unix core_unix core_unix.filename_unix)
-  (inline_tests)
-  (preprocessor_deps ../src/merge_fmt.exe)
-  (preprocess (pps ppx_expect)))
-
+ (name merge_fmt_test)
+ (libraries base stdio unix core_unix core_unix.filename_unix)
+ (inline_tests)
+ (preprocessor_deps ../src/merge_fmt.exe)
+ (preprocess
+  (pps ppx_expect)))
 
 ;; [rebase_a.ml] and [rebase_b.ml] should be the same expect that
 ;; [rebase_b.ml] does rebase in an intermediate revision.
-(rule
-  (targets rebase.diff.gen)
-  (action (with-stdout-to %{targets} (bash "diff %{dep:rebase_a.ml} %{dep:rebase_b.ml} || true"))))
 
-(alias
-  (name runtest)
-  (action (diff rebase.diff rebase.diff.gen)))
+(rule
+ (targets rebase.diff.gen)
+ (action
+  (with-stdout-to
+   %{targets}
+   (bash "diff %{dep:rebase_a.ml} %{dep:rebase_b.ml} || true"))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff rebase.diff rebase.diff.gen)))

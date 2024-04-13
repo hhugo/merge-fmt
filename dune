@@ -2,22 +2,34 @@
  (targets merge-fmt-help.txt)
  (deps ./src/merge_fmt.exe)
  (mode promote)
- (action (with-stdout-to %{targets} (run ./src/merge_fmt.exe --help=plain))))
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ./src/merge_fmt.exe --help=plain))))
 
 (rule
  (targets merge-fmt-mergetool-help.txt)
  (deps ./src/merge_fmt.exe)
  (mode promote)
- (action (with-stdout-to %{targets} (run ./src/merge_fmt.exe mergetool --help=plain))))
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ./src/merge_fmt.exe mergetool --help=plain))))
 
 (rule
  (targets merge-fmt-setup-mergetool-help.txt)
  (deps ./src/merge_fmt.exe)
  (mode promote)
- (action (with-stdout-to %{targets} (run ./src/merge_fmt.exe setup-mergetool --help=plain))))
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ./src/merge_fmt.exe setup-mergetool --help=plain))))
 
 (rule
  (targets merge-fmt-setup-merge-help.txt)
  (deps ./src/merge_fmt.exe)
  (mode promote)
- (action (with-stdout-to %{targets} (run ./src/merge_fmt.exe setup-merge --help=plain))))
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ./src/merge_fmt.exe setup-merge --help=plain))))
