@@ -46,6 +46,12 @@ let print_file file =
   printf "File %s\n" file;
   print_endline (In_channel.read_all file)
 
+let filter_hint expected =
+  String.split ~on:'\n' expected
+  |> List.filter ~f:(fun s ->
+         not (String.is_prefix ~prefix:"hint:" (String.strip s)))
+  |> String.concat ~sep:"\n" |> print_string
+
 let git_init () =
   system "git init . -q";
   write ".ocamlformat" "profile=janestreet";
@@ -122,7 +128,8 @@ let%expect_test _ =
         core.repositoryformatversion=0
         core.filemode=true
         core.bare=false
-        core.logallrefupdates=true |}];
+        core.logallrefupdates=true
+        |}];
       system "git show --format=raw HEAD";
       [%expect
         {|

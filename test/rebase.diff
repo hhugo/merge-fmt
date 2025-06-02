@@ -3,32 +3,30 @@
 >       print_status ();
 >       [%expect {|
 >         no changes |}];
-40,41c44,46
+41,43c45,48
 <         CONFLICT (modify/delete): a.ml deleted in HEAD and modified in 5f62452 (second commit (fork)).  Version 5f62452 (second commit (fork)) of a.ml left in tree.
 <         error: could not apply 5f62452... second commit (fork)
+<         Could not apply 5f62452... second commit (fork)
 ---
 >         Auto-merging b.ml
 >         CONFLICT (content): Merge conflict in b.ml
 >         error: could not apply 6070a8f... second commit (fork)
-46c51
-<         Could not apply 5f62452... second commit (fork)
----
 >         Could not apply 6070a8f... second commit (fork)
-51c56
+49c54
 <         DU File a.ml
 ---
 >         UU File b.ml
-52a58,61
+50a56,59
 >         <<<<<<< HEAD
 >         type t = { a : int; b : string;
 >                    c : float; d : unit option }
 >         =======
-57c66,67
+55c64,65
 <           } |}];
 ---
 >           }
 >         >>>>>>> 6070a8f (second commit (fork)) |}];
-59,62c69,70
+57,60c67,68
 <       [%expect
 <         {|
 <         Ignore a.ml (not a 3-way merge)
@@ -36,12 +34,12 @@
 ---
 >       [%expect {|
 >         Resolved 1/1 b.ml |}];
-66,67c74
+64,65c72
 <         DU File a.ml
 < 
 ---
 >         M File b.ml
-69,71c76,79
+67,69c74,77
 <           { a : int option;
 <             b : string;
 <             c : float;
@@ -50,7 +48,7 @@
 >           ; b : string
 >           ; c : float
 >           ; d : unit option
-76,79c84,85
+74,77c82,83
 <         a.ml: needs merge
 <         You must edit all merge conflicts and then
 <         mark them as resolved using git add
