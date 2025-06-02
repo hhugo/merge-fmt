@@ -72,17 +72,15 @@ type t =
       git_commit "third commit (fork)";
       git_branch "old_branch1";
       system "git rebase branch2 -q";
+      filter_hint [%expect.output];
       [%expect
         {|
         Auto-merging b.ml
         CONFLICT (content): Merge conflict in b.ml
         error: could not apply 6499b96... second commit (fork)
-        hint: Resolve all conflicts manually, mark them as resolved with
-        hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
-        hint: You can instead skip this commit: run "git rebase --skip".
-        hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
         Could not apply 6499b96... second commit (fork)
-        Exit with 1 |}];
+        Exit with 1
+        |}];
       print_status ();
       [%expect
         {|
@@ -128,6 +126,7 @@ type t =
             | A
             | B of int |}];
       system "git rebase --continue";
+      filter_hint [%expect.output];
       [%expect
         {|
         [detached HEAD 3fd12a7] second commit (fork)
@@ -135,12 +134,9 @@ type t =
         Auto-merging b.ml
         CONFLICT (content): Merge conflict in b.ml
         error: could not apply bfafc01... third commit (fork)
-        hint: Resolve all conflicts manually, mark them as resolved with
-        hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
-        hint: You can instead skip this commit: run "git rebase --skip".
-        hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
         Could not apply bfafc01... third commit (fork)
-        Exit with 1 |}];
+        Exit with 1
+        |}];
       print_status ();
       [%expect
         {|

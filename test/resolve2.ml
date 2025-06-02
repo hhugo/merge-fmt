@@ -39,17 +39,15 @@ type t =
       git_branch "old_branch1";
       [%expect {| Switched to branch 'branch1' |}];
       system "git rebase branch2 -q";
+      filter_hint [%expect.output];
       [%expect
         {|
         Auto-merging b.ml
         CONFLICT (content): Merge conflict in b.ml
         error: could not apply ead71ee... second commit (fork)
-        hint: Resolve all conflicts manually, mark them as resolved with
-        hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
-        hint: You can instead skip this commit: run "git rebase --skip".
-        hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
         Could not apply ead71ee... second commit (fork)
-        Exit with 1 |}];
+        Exit with 1
+        |}];
       print_status ();
       [%expect
         {|
