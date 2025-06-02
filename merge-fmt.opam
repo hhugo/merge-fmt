@@ -17,7 +17,7 @@ depends: [
   "stdio"
   "ppx_expect" { with-test }
   "core_unix"  { with-test }
-  "ocamlformat"  { = "0.24.1" & with-test }
+  "ocamlformat"  { = "0.27.0" & with-test }
 ]
 
 synopsis: "Git mergetool leveraging code formatters"
