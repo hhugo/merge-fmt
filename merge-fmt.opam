@@ -8,6 +8,7 @@ authors: ["Hugo Heuzard"]
 license: "MIT"
 homepage: "https://github.com/hhugo/merge-fmt"
 doc: "https://hhugo.github.io/merge-fmt/"
+bug-reports: "https://github.com/hhugo/merge-fmt/issues"
 depends: [
   "dune" {>= "3.0"}
   "ocaml" {>= "4.8"}
@@ -33,3 +34,4 @@ build: [
     "@doc" {with-doc}
   ]
 ]
+dev-repo: "git+https://github.com/hhugo/merge-fmt.git"

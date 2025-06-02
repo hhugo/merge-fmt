@@ -4,11 +4,12 @@
 
 (generate_opam_files true)
 
+
+
 (authors "Hugo Heuzard")
 
 (maintainers "hugo.heuzard@gmail.com")
-
-(homepage "https://github.com/hhugo/merge-fmt")
+(source (github hhugo/merge-fmt))
 
 (documentation "https://hhugo.github.io/merge-fmt/")
 
