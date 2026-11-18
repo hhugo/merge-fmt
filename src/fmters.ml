@@ -7,9 +7,15 @@ type config =
   ; dune_path : string option
   }
 
+type file =
+  | Copy
+  | Inplace
+
 type t =
-  | Inplace of string
+  | File of file * string
   | Stdout of string
+
+type formatter = string -> t
 
 let transfer ic oc =
   let b = Bytes.create 4096 in
@@ -22,14 +28,18 @@ let transfer ic oc =
   in
   loop ()
 
-let ocamlformat ~bin ~name =
-  Inplace
-    (sprintf "%s -i %s"
-       (Option.value ~default:"ocamlformat" bin)
-       (Option.value_map ~default:"" ~f:(fun name -> " --name=" ^ name) name))
+let ocamlformat ~bin ~name ~output =
+  let command =
+    sprintf "%s %s"
+      (Option.value ~default:"ocamlformat" bin)
+      (Option.value_map ~default:""
+         ~f:(fun name -> " --name=" ^ Stdlib.Filename.quote name)
+         name)
+  in
+  File (Copy, sprintf "%s -o %s" command (Stdlib.Filename.quote output))
 
 let refmt ~bin =
-  Inplace (sprintf "%s --inplace" (Option.value ~default:"refmt" bin))
+  File (Inplace, sprintf "%s --inplace" (Option.value ~default:"refmt" bin))
 
 let dune ~bin =
   Stdout (sprintf "%s format-dune-file --" (Option.value ~default:"dune" bin))
@@ -42,15 +52,16 @@ let find ~config ~filename ~name =
     , config )
   with
   | _, (".ml" | ".mli"), { ocamlformat_path; _ } ->
-      Some (ocamlformat ~bin:ocamlformat_path ~name)
-  | _, (".re" | ".rei"), { refmt_path; _ } -> Some (refmt ~bin:refmt_path)
+      Some (fun output -> ocamlformat ~bin:ocamlformat_path ~name ~output)
+  | _, (".re" | ".rei"), { refmt_path; _ } ->
+      Some (fun _ -> refmt ~bin:refmt_path)
   | ("dune" | "dune-project" | "dune-workspace"), "", { dune_path; _ } ->
-      Some (dune ~bin:dune_path)
+      Some (fun _ -> dune ~bin:dune_path)
   | _ -> None
 
 let run t ~echo ~filename =
   match t with
-  | Inplace t -> system ~echo "%s %s" t filename
+  | File (_, command) -> system ~echo "%s %s" command filename
   | Stdout t -> (
       let ic = open_process_in ~echo "%s %s" t filename in
       let tmp_file, oc = Stdlib.Filename.open_temp_file "merge-fmt" "stdout" in
@@ -64,6 +75,18 @@ let run t ~echo ~filename =
           Stdlib.Printf.eprintf ">>> Exit with %d\n" n;
           Error ()
       | WSIGNALED _ | WSTOPPED _ -> Error ())
+
+let format_to_file (formatter : formatter) ~echo ~filename =
+  match formatter filename with
+  | File (Copy, _) ->
+      let output =
+        Stdlib.Filename.temp_file "merge-fmt-"
+          (Stdlib.Filename.extension filename)
+      in
+      Stdlib.at_exit (fun () -> Stdlib.Sys.remove output);
+      run (formatter output) ~echo ~filename |> Result.map ~f:(fun () -> output)
+  | (File (Inplace, _) | Stdout _) as t ->
+      run t ~echo ~filename |> Result.map ~f:(fun () -> filename)
 
 module Flags = struct
   open Cmdliner

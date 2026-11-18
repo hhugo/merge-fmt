@@ -9,6 +9,10 @@ COMMANDS
        mergetool [OPTION]…
            git mergetool
 
+       setup-jj-mergetool [--echo] [--merge-fmt-path=VAL] [--update]
+       [OPTION]…
+           Register the [merge-fmt] merge tool in jj
+
        setup-merge [--echo] [--merge-fmt-path=VAL] [--update] [OPTION]…
            Register the [merge-fmt] mergetool as the default merge driver in
            git

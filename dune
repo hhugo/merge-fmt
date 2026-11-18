@@ -33,3 +33,12 @@
   (with-stdout-to
    %{targets}
    (run ./src/merge_fmt.exe setup-merge --help=plain))))
+
+(rule
+ (targets merge-fmt-setup-jj-mergetool-help.txt)
+ (deps ./src/merge_fmt.exe)
+ (mode promote)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ./src/merge_fmt.exe setup-jj-mergetool --help=plain))))

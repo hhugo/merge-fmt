@@ -8,6 +8,7 @@ help:
 		merge-fmt-help.txt \
 		merge-fmt-mergetool-help.txt \
 		merge-fmt-setup-mergetool-help.txt \
+		merge-fmt-setup-jj-mergetool-help.txt \
 		merge-fmt-setup-merge-help.txt
 .PHONY: test
 test:

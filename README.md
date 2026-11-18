@@ -15,7 +15,7 @@ Note that supporting new code formatters is trivial.
 
 Getting started
 ----------------
-There are three ways to use merge-fmt.
+There are four ways to use merge-fmt.
 
 ### Standalone
 Just call `merge-fmt` while there are unresolved conflicts. `merge-fmt` will try
@@ -43,6 +43,19 @@ git config --local merge.tool 'mergefmt'
 git config --local merge.default 'mergefmt'
 ```
 
+### As a Jujutsu merge tool
+`merge-fmt` can act as a jujutsu [merge tool](https://docs.jj-vcs.dev/latest/config/#3-way-merge-tools-for-conflict-resolution).
+Configure the current jj repository with
+```
+merge-fmt setup-jj-mergetool
+jj config set --repo merge-tools.merge-fmt.program '"merge-fmt"'
+jj config set --repo merge-tools.merge-fmt.merge-args '["mergetool", "--base=$base", "--current=$left", "--other=$right", "-o", "$output", "--name=$path"]'
+```
+
+Then, use `jj resolve` to resolve conflicts with
+```
+jj resolve --tool merge-fmt
+```
 
 Install
 -------
