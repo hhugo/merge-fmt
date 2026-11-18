@@ -58,28 +58,26 @@ let merge config echo current base other output name =
   | (None | Some ""), _, _ | _, (None | Some ""), _ | _, _, (None | Some "") ->
       Stdlib.exit 1
   | Some current, Some base, Some other -> (
-      let name = Option.map name ~f:resolve_name in
+      let name =
+        Some (Option.value_map name ~default:current ~f:resolve_name)
+      in
       match Fmters.find ~config ~filename:current ~name with
       | None ->
           debug "Couldn't find a formatter for %s\n%!" current;
           merge_file ~echo ~current ~base ~other ~output
       | Some formatter -> (
-          let x =
-            Fmters.run formatter ~echo ~filename:current
-            |> Result.map_error ~f:(Fn.const "current")
-          and y =
-            Fmters.run formatter ~echo ~filename:other
-            |> Result.map_error ~f:(Fn.const "other")
-          and z =
-            Fmters.run formatter ~echo ~filename:base
-            |> Result.map_error ~f:(Fn.const "base")
+          let format filename =
+            Fmters.format_to_file formatter ~echo ~filename
           in
+          let x = Result.map_error (format current) ~f:(Fn.const "current")
+          and y = Result.map_error (format other) ~f:(Fn.const "other")
+          and z = Result.map_error (format base) ~f:(Fn.const "base") in
           match Result.combine_errors [ x; y; z ] with
-          | Error _ -> Stdlib.exit 1
-          | Ok (_ : unit list) ->
+          | Ok ([ current; other; base ] : string list) ->
               debug "process all three revision successfully\n%!";
               debug "running git merge-file\n%!";
-              merge_file ~echo ~current ~base ~other ~output))
+              merge_file ~echo ~current ~base ~other ~output
+          | Error _ | Ok _ -> Stdlib.exit 1))
 
 open Cmdliner
 

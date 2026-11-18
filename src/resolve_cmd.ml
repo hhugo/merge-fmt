@@ -87,13 +87,13 @@ let fix ~echo ~filename ~versions ~formatter =
   let theirs = create_tmp ~echo filename Theirs versions in
   let common = create_tmp ~echo filename Common versions in
   let x =
-    Fmters.run formatter ~echo ~filename:ours
+    Fmters.run (formatter ours) ~echo ~filename:ours
     |> Result.map_error ~f:(Fn.const ours)
   and y =
-    Fmters.run formatter ~echo ~filename:theirs
+    Fmters.run (formatter theirs) ~echo ~filename:theirs
     |> Result.map_error ~f:(Fn.const theirs)
   and z =
-    Fmters.run formatter ~echo ~filename:common
+    Fmters.run (formatter common) ~echo ~filename:common
     |> Result.map_error ~f:(Fn.const common)
   in
   match Result.combine_errors_unit [ x; y; z ] with

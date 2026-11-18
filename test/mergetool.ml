@@ -373,3 +373,55 @@ let%expect_test "when the merge fails, the output is left untouched" =
         File result.bin
         previous content
         |}])
+
+let%expect_test "read-only merge inputs are preserved" =
+  within_temp_dir (fun () ->
+      git_init ();
+      let inputs =
+        [ ("base.ml", "let x=1\nlet y=2\n")
+        ; ("current.ml", "let x = 1\nlet y = 2\n")
+        ; ("other.ml", "let x=42\nlet y=2\n")
+        ]
+      in
+      List.iter inputs ~f:(fun (filename, contents) ->
+          Out_channel.write_all filename ~data:contents;
+          Unix.chmod filename 0o444);
+      Out_channel.write_all "result.ml" ~data:"";
+      system
+        "%s mergetool --base=base.ml --current=current.ml --other=other.ml -o \
+         result.ml --name=result.ml"
+        merge_fmt;
+      List.iter inputs ~f:(fun (filename, contents) ->
+          assert (String.equal (In_channel.read_all filename) contents);
+          assert (Int.equal (Unix.stat filename).st_perm 0o444));
+      print_file "result.ml";
+      [%expect
+        {|
+        File result.ml
+        let x = 42
+        let y = 2
+        |}])
+
+let%expect_test "omitted name uses the original input configuration" =
+  within_temp_dir (fun () ->
+      Unix.mkdir "project" 0o700;
+      Out_channel.write_all "project/.ocamlformat" ~data:"profile=janestreet\n";
+      List.iter [ "base"; "current"; "other" ] ~f:(fun side ->
+          Out_channel.write_all
+            ("project/" ^ side ^ ".ml")
+            ~data:"type t={a:int;b:string;c:float}\n");
+      Out_channel.write_all "result.ml" ~data:"";
+      system
+        "%s mergetool --base=project/base.ml --current=project/current.ml \
+         --other=project/other.ml -o result.ml"
+        merge_fmt;
+      print_file "result.ml";
+      [%expect
+        {|
+        File result.ml
+        type t =
+          { a : int
+          ; b : string
+          ; c : float
+          }
+        |}])
