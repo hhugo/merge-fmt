@@ -36,7 +36,11 @@ let dune ~bin =
 
 let find ~config ~filename ~name =
   let filename = Option.value ~default:filename name in
-  match (filename, Stdlib.Filename.extension filename, config) with
+  match
+    ( Stdlib.Filename.basename filename
+    , Stdlib.Filename.extension filename
+    , config )
+  with
   | _, (".ml" | ".mli"), { ocamlformat_path; _ } ->
       Some (ocamlformat ~bin:ocamlformat_path ~name)
   | _, (".re" | ".rei"), { refmt_path; _ } -> Some (refmt ~bin:refmt_path)
