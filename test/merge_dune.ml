@@ -93,10 +93,12 @@ let%expect_test "default merge tool" =
 let%expect_test "custom merge tool" =
   within_temp_dir (fun () ->
       git_init ();
+      Unix.mkdir "lib" 0o700;
+      let filename = "lib/dune" in
       system "%s setup-merge --merge-fmt-path %s --update" merge_fmt merge_fmt;
       [%expect {||}];
 
-      write "dune" {|
+      write filename {|
 (executable
 (name aaaa)
 (libraries unix))
@@ -107,7 +109,7 @@ let%expect_test "custom merge tool" =
       (* add public name *)
       if false
       then (
-        write "dune"
+        write filename
           {|
 (executable
 (name aaaa)
@@ -117,7 +119,7 @@ let%expect_test "custom merge tool" =
         git_commit "second commit");
 
       (* add library *)
-      write "dune"
+      write filename
         {|
 (executable
 (name aaaa)
@@ -132,14 +134,14 @@ let%expect_test "custom merge tool" =
       git_checkout "branch1";
       [%expect {| Switched to branch 'branch1' |}];
       (* change name to b, reformat *)
-      write "dune" {|
+      write filename {|
 (executable
  (name bbbb)
  (libraries unix))
 |};
       git_commit "second commit (fork)";
 
-      write "dune"
+      write filename
         {|
 (alias
  (name runtest)
@@ -156,12 +158,12 @@ let%expect_test "custom merge tool" =
       system "git rebase branch2 -q";
       [%expect {| |}];
       system "%s" merge_fmt;
-      print_file "dune";
+      print_file filename;
       [%expect
         {|
         Nothing to resolve
         Exit with 1
-        File dune
+        File lib/dune
         (alias
          (name runtest)
          (action
