@@ -1,6 +1,6 @@
 open! Base
 open! Stdio
-open! Common
+open! Merge_fmt_test.Common
 
 let%expect_test "print jj configuration" =
   system "%s setup-jj-mergetool" merge_fmt;
@@ -12,7 +12,7 @@ let%expect_test "print jj configuration" =
 
 let%expect_test "configure jj without changing the default merge tool" =
   within_temp_dir (fun () ->
-      Core_unix.putenv ~key:"XDG_CONFIG_HOME"
+      Unix.putenv ~key:"XDG_CONFIG_HOME"
         ~data:(Stdlib.Filename.concat (Unix.getcwd ()) "config");
       system "jj git init . >/dev/null 2>&1";
       system "jj config set --repo ui.merge-editor :builtin";

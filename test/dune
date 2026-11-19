@@ -1,8 +1,21 @@
 (library
  (name merge_fmt_test)
+ (modules :standard \ setup_jj)
  (libraries base stdio unix)
- (inline_tests)
- (preprocessor_deps ../src/merge_fmt.exe)
+ (inline_tests
+  (deps ../src/merge_fmt.exe))
+ (preprocess
+  (pps ppx_devtools-expect)))
+
+;; Tests that need jj. They are skipped when jj is not installed.
+
+(library
+ (name merge_fmt_test_jj)
+ (modules setup_jj)
+ (enabled_if %{bin-available:jj})
+ (libraries base stdio unix merge_fmt_test)
+ (inline_tests
+  (deps ../src/merge_fmt.exe))
  (preprocess
   (pps ppx_devtools-expect)))
 

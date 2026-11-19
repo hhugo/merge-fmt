@@ -10,7 +10,7 @@ homepage: "https://github.com/hhugo/merge-fmt"
 doc: "https://hhugo.github.io/merge-fmt/"
 bug-reports: "https://github.com/hhugo/merge-fmt/issues"
 depends: [
-  "dune" {>= "3.0"}
+  "dune" {>= "3.15"}
   "ocaml" {>= "4.8"}
   "cmdliner" {>= "1.1.0"}
   "base"
