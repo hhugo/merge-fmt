@@ -304,10 +304,7 @@ let%expect_test "relative name, from a subdirectory" =
           }
         |}])
 
-(* FIXME: when the formatted files conflict, nothing is written to the
-   output. The result of the merge, with its conflict markers, should be
-   written, as is done when there is no formatter. *)
-let%expect_test "with a formatter, conflicts are not written to the output" =
+let%expect_test "with a formatter, conflicts are written to the output" =
   within_temp_dir (fun () ->
       git_init ();
       List.iter
@@ -323,7 +320,36 @@ let%expect_test "with a formatter, conflicts are not written to the output" =
          result.ml --name=result.ml"
         merge_fmt;
       print_file "result.ml";
-      [%expect {|
+      [%expect
+        {|
         Exit with 1
         File result.ml
+        <<<<<<< current.ml
+        let x = 2
+        =======
+        let x = 3
+        >>>>>>> other.ml
+        |}])
+
+let%expect_test "when the merge fails, the output is left untouched" =
+  within_temp_dir (fun () ->
+      List.iter
+        [ ("base.bin", "a\000b\n")
+        ; ("current.bin", "a\000c\n")
+        ; ("other.bin", "a\000d\n")
+        ]
+        ~f:(fun (filename, contents) ->
+          Out_channel.write_all filename ~data:contents);
+      Out_channel.write_all "result.bin" ~data:"previous content\n";
+      system
+        "%s mergetool --base=base.bin --current=current.bin --other=other.bin \
+         -o result.bin --name=result.bin 2>&1"
+        merge_fmt;
+      print_file "result.bin";
+      [%expect
+        {|
+        error: Cannot merge binary files: current.bin
+        Exit with 255
+        File result.bin
+        previous content
         |}])

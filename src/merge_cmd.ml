@@ -14,6 +14,25 @@ let debug fmt =
   then Printf.ksprintf (fun _ -> ()) fmt
   else Printf.ksprintf (Out_channel.fprintf (Lazy.force debug_oc) "%s") fmt
 
+(* Merge with [git merge-file] and write the result to [output]. It exits
+   with the number of conflicts, or with a larger value on error. When there
+   are conflicts, the result is still written: it contains the conflict
+   markers. On error, there is no result and the output is left untouched. *)
+let merge_file ~echo ~current ~base ~other ~output =
+  let result, code =
+    open_process_in_status ~echo "git merge-file -p %s %s %s"
+      (Stdlib.Filename.quote current)
+      (Stdlib.Filename.quote base)
+      (Stdlib.Filename.quote other)
+  in
+  if code < 0 || code > 127
+  then Stdlib.exit code
+  else (
+    (match output with
+    | None -> Out_channel.output_string stdout result
+    | Some o -> Out_channel.write_all o ~data:result);
+    Stdlib.exit (if code = 0 then 0 else 1))
+
 let merge config echo current base other output name =
   match (current, base, other) with
   | (None | Some ""), _, _ | _, (None | Some ""), _ | _, _, (None | Some "") ->
@@ -22,18 +41,7 @@ let merge config echo current base other output name =
       match Fmters.find ~config ~filename:current ~name with
       | None ->
           debug "Couldn't find a formatter for %s\n%!" current;
-          (* [git merge-file] exits with the number of conflicts. Write the
-             result in that case as well: it contains the conflict markers. *)
-          let result, code =
-            open_process_in_status ~echo "git merge-file -p %s %s %s"
-              (Stdlib.Filename.quote current)
-              (Stdlib.Filename.quote base)
-              (Stdlib.Filename.quote other)
-          in
-          (match output with
-          | None -> Out_channel.output_string stdout result
-          | Some o -> Out_channel.write_all o ~data:result);
-          Stdlib.exit code
+          merge_file ~echo ~current ~base ~other ~output
       | Some formatter -> (
           let x =
             Fmters.run formatter ~echo ~filename:current
@@ -50,14 +58,7 @@ let merge config echo current base other output name =
           | Ok (_ : unit list) ->
               debug "process all three revision successfully\n%!";
               debug "running git merge-file\n%!";
-              let result =
-                open_process_in_respect_exit ~echo "git merge-file -p %s %s %s"
-                  current base other
-              in
-              (match output with
-              | None -> Out_channel.output_string stdout result
-              | Some o -> Out_channel.write_all o ~data:result);
-              Stdlib.exit 0))
+              merge_file ~echo ~current ~base ~other ~output))
 
 open Cmdliner
 
