@@ -30,6 +30,11 @@ jobs:
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
 
+      - name: Install jj
+        run: |
+          curl -fsSL https://github.com/jj-vcs/jj/releases/download/v0.47.1/jj-v0.47.1-x86_64-unknown-linux-musl.tar.gz \
+            | sudo tar -xz -C /usr/local/bin ./jj
+
       - run: opam install . --with-test
 
       - run: opam exec -- make all
