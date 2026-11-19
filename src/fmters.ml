@@ -17,17 +17,6 @@ type t =
 
 type formatter = string -> t
 
-let transfer ic oc =
-  let b = Bytes.create 4096 in
-  let rec loop () =
-    match Stdlib.input ic b 0 (Bytes.length b) with
-    | 0 -> ()
-    | l ->
-        Stdlib.output oc b 0 l;
-        loop ()
-  in
-  loop ()
-
 let ocamlformat ~bin ~name ~output =
   let command =
     sprintf "%s %s"
@@ -59,39 +48,47 @@ let find ~config ~filename ~name =
       Some (fun _ -> dune ~bin:dune_path)
   | _ -> None
 
+(* Run a formatter that prints its result, and write it to [output]. This
+   can be [filename] itself: it is only written once the formatter is done,
+   and only when it succeeds. *)
+let run_stdout command ~echo ~filename ~output =
+  let ic =
+    open_process_in ~echo "%s %s" command (Stdlib.Filename.quote filename)
+  in
+  let result = Stdio.In_channel.input_all ic in
+  match Unix.close_process_in ic with
+  | WEXITED 0 ->
+      Stdio.Out_channel.write_all output ~data:result;
+      Ok ()
+  | WEXITED n ->
+      Stdlib.Printf.eprintf ">>> Exit with %d\n" n;
+      Error ()
+  | WSIGNALED _ | WSTOPPED _ -> Error ()
+
 let run t ~echo ~filename =
   match t with
   | File (_, command) ->
       system ~echo "%s %s" command (Stdlib.Filename.quote filename)
-  | Stdout t -> (
-      let ic =
-        open_process_in ~echo "%s %s" t (Stdlib.Filename.quote filename)
-      in
-      let tmp_file, oc =
-        Stdlib.Filename.open_temp_file ~mode:[ Open_binary ] "merge-fmt"
-          "stdout"
-      in
-      transfer ic oc;
-      Stdlib.close_out oc;
-      match Unix.close_process_in ic with
-      | WEXITED 0 ->
-          Stdlib.Sys.rename tmp_file filename;
-          Ok ()
-      | WEXITED n ->
-          Stdlib.Printf.eprintf ">>> Exit with %d\n" n;
-          Error ()
-      | WSIGNALED _ | WSTOPPED _ -> Error ())
+  | Stdout command -> run_stdout command ~echo ~filename ~output:filename
 
 let format_to_file (formatter : formatter) ~echo ~filename =
+  let temp_file () =
+    let output =
+      Stdlib.Filename.temp_file "merge-fmt-"
+        (Stdlib.Filename.extension filename)
+    in
+    Stdlib.at_exit (fun () -> Stdlib.Sys.remove output);
+    output
+  in
   match formatter filename with
   | File (Copy, _) ->
-      let output =
-        Stdlib.Filename.temp_file "merge-fmt-"
-          (Stdlib.Filename.extension filename)
-      in
-      Stdlib.at_exit (fun () -> Stdlib.Sys.remove output);
+      let output = temp_file () in
       run (formatter output) ~echo ~filename |> Result.map ~f:(fun () -> output)
-  | (File (Inplace, _) | Stdout _) as t ->
+  | Stdout command ->
+      let output = temp_file () in
+      run_stdout command ~echo ~filename ~output
+      |> Result.map ~f:(fun () -> output)
+  | File (Inplace, _) as t ->
       run t ~echo ~filename |> Result.map ~f:(fun () -> filename)
 
 module Flags = struct
