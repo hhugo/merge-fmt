@@ -6,6 +6,9 @@
 - `mergetool`: when the merge has conflicts, write the result, with its
   conflict markers, to the output and exit with 1. When the merge fails,
   leave the output untouched.
+- `mergetool`: a relative `--name` is now relative to the root of the
+  repository (the closest parent directory containing `.git` or `.jj`), not
+  to the current directory.
 
 ## 0.3 (2023-02-18)
 
