@@ -18,6 +18,9 @@
   on another filesystem.
 - `mergetool`: dune files are no longer formatted in place: the files given
   with `--current`, `--base` and `--other` are left untouched.
+- `mergetool`: when the formatter fails, merge the files as they are instead
+  of failing. A merge that does not conflict no longer becomes a conflict
+  because a file could not be formatted.
 
 ## 0.5 (2026-11-19)
 
