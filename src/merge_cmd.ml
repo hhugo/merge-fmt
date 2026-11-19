@@ -22,7 +22,18 @@ let merge config echo current base other output name =
       match Fmters.find ~config ~filename:current ~name with
       | None ->
           debug "Couldn't find a formatter for %s\n%!" current;
-          system_respect_exit ~echo "git merge-file %s %s %s" current base other
+          (* [git merge-file] exits with the number of conflicts. Write the
+             result in that case as well: it contains the conflict markers. *)
+          let result, code =
+            open_process_in_status ~echo "git merge-file -p %s %s %s"
+              (Stdlib.Filename.quote current)
+              (Stdlib.Filename.quote base)
+              (Stdlib.Filename.quote other)
+          in
+          (match output with
+          | None -> Out_channel.output_string stdout result
+          | Some o -> Out_channel.write_all o ~data:result);
+          Stdlib.exit code
       | Some formatter -> (
           let x =
             Fmters.run formatter ~echo ~filename:current

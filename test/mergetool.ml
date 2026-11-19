@@ -213,3 +213,53 @@ let%expect_test "the result name does not need to exist" =
         let x = 42
         let y = 2
         |}])
+
+let merge_txt ~current ~other =
+  let inputs =
+    [ ("base.txt", "a\nb\nc\nd\ne\n")
+    ; ("current.txt", current)
+    ; ("other.txt", other)
+    ]
+  in
+  List.iter inputs ~f:(fun (filename, contents) ->
+      Out_channel.write_all filename ~data:contents;
+      Unix.chmod filename 0o444);
+  Out_channel.write_all "result.txt" ~data:"";
+  system
+    "%s mergetool --base=base.txt --current=current.txt --other=other.txt -o \
+     result.txt --name=result.txt"
+    merge_fmt;
+  List.iter inputs ~f:(fun (filename, contents) ->
+      assert (String.equal (In_channel.read_all filename) contents));
+  print_file "result.txt"
+
+let%expect_test "without a formatter, the result is written to the output" =
+  within_temp_dir (fun () ->
+      merge_txt ~current:"A\nb\nc\nd\ne\n" ~other:"a\nb\nc\nd\nE\n";
+      [%expect
+        {|
+        File result.txt
+        A
+        b
+        c
+        d
+        E
+        |}])
+
+let%expect_test "without a formatter, conflicts are written to the output" =
+  within_temp_dir (fun () ->
+      merge_txt ~current:"a\nb\nC1\nd\ne\n" ~other:"a\nb\nC2\nd\ne\n";
+      [%expect
+        {|
+        Exit with 1
+        File result.txt
+        a
+        b
+        <<<<<<< current.txt
+        C1
+        =======
+        C2
+        >>>>>>> other.txt
+        d
+        e
+        |}])
