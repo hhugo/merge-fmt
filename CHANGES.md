@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Add `setup-jj-mergetool`, to use merge-fmt as a Jujutsu merge tool. (#15)
+- `mergetool`: add `--diff3`, to show conflicts in diff3 style. (#15)
+- `mergetool`: OCaml files are no longer formatted in place: the files given
+  with `--current`, `--base` and `--other` are left untouched. (#15)
 - `mergetool`: `--name` no longer needs to be the path of an existing file.
 - `mergetool`: when no formatter is found, write the result to the output
   given with `-o` instead of modifying the current file in place.
