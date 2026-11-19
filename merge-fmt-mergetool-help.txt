@@ -16,7 +16,8 @@ OPTIONS
            Echo all commands.
 
        --name=<result-name>
-           pathname in which the merged result will be stored
+           pathname in which the merged result will be stored. When relative,
+           it is relative to the root of the repository.
 
        -o <output-to>
 

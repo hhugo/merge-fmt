@@ -33,11 +33,32 @@ let merge_file ~echo ~current ~base ~other ~output =
     | Some o -> Out_channel.write_all o ~data:result);
     Stdlib.exit (if code = 0 then 0 else 1))
 
+(* The closest parent directory that is the root of a repository. *)
+let rec find_root dir =
+  if
+    List.exists [ ".jj"; ".git" ] ~f:(fun marker ->
+        Stdlib.Sys.file_exists (Stdlib.Filename.concat dir marker))
+  then Some dir
+  else
+    let parent = Stdlib.Filename.dirname dir in
+    if String.equal parent dir then None else find_root parent
+
+(* [name] is the path of the merged file in the repository: when relative, it
+   is relative to the root of the repository, not to the current directory. *)
+let resolve_name name =
+  if not (Stdlib.Filename.is_relative name)
+  then name
+  else
+    match find_root (Stdlib.Sys.getcwd ()) with
+    | Some root -> Stdlib.Filename.concat root name
+    | None -> name
+
 let merge config echo current base other output name =
   match (current, base, other) with
   | (None | Some ""), _, _ | _, (None | Some ""), _ | _, _, (None | Some "") ->
       Stdlib.exit 1
   | Some current, Some base, Some other -> (
+      let name = Option.map name ~f:resolve_name in
       match Fmters.find ~config ~filename:current ~name with
       | None ->
           debug "Couldn't find a formatter for %s\n%!" current;
@@ -85,7 +106,10 @@ let cmd =
     Arg.(value & opt (some file) None & info [ "o" ] ~docv:"<output-to>" ~doc)
   in
   let result_name =
-    let doc = "pathname in which the merged result will be stored" in
+    let doc =
+      "pathname in which the merged result will be stored. When relative, it \
+       is relative to the root of the repository."
+    in
     Arg.(
       value
       & opt (some string) None

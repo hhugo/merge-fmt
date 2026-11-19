@@ -264,37 +264,57 @@ let%expect_test "without a formatter, conflicts are written to the output" =
         e
         |}])
 
-(* FIXME: a relative [--name] is interpreted relative to the current
-   directory. Tools such as jj pass a path relative to the root of the
-   repository, whatever the current directory is. Below, [a/b.ml] should be
-   formatted using [a/.ocamlformat] (default profile) in both cases. From the
-   subdirectory [c], the configuration at the root (janestreet profile) is
-   used instead. *)
-let%expect_test "relative name, from a subdirectory" =
+(* A relative [--name] is relative to the root of the repository, whatever the
+   current directory is: [a/b.ml] is formatted using [a/.ocamlformat] (default
+   profile) and not the configuration at the root (janestreet profile). *)
+let merge_with_relative_name ~from =
+  Unix.mkdir "a" 0o700;
+  Unix.mkdir "c" 0o700;
+  Out_channel.write_all ".ocamlformat" ~data:"profile=janestreet\n";
+  Out_channel.write_all "a/.ocamlformat" ~data:"profile=default\n";
+  List.iter [ "base"; "current"; "other" ] ~f:(fun side ->
+      Out_channel.write_all (side ^ ".ml") ~data:"type t={a:int;b:string}\n");
+  Out_channel.write_all "result.ml" ~data:"";
+  let root = Unix.getcwd () in
+  system
+    "cd %s && %s mergetool --base=%s/base.ml --current=%s/current.ml \
+     --other=%s/other.ml -o %s/result.ml --name=a/b.ml"
+    from merge_fmt root root root root;
+  print_file "result.ml"
+
+let%expect_test "relative name, from the root of a git repository" =
   within_temp_dir (fun () ->
       git_init ();
-      Unix.mkdir "a" 0o700;
-      Unix.mkdir "c" 0o700;
-      Out_channel.write_all "a/.ocamlformat" ~data:"profile=default\n";
-      let merge ~from =
-        List.iter [ "base"; "current"; "other" ] ~f:(fun side ->
-            Out_channel.write_all (side ^ ".ml")
-              ~data:"type t={a:int;b:string}\n");
-        Out_channel.write_all "result.ml" ~data:"";
-        let root = Unix.getcwd () in
-        system
-          "cd %s && %s mergetool --base=%s/base.ml --current=%s/current.ml \
-           --other=%s/other.ml -o %s/result.ml --name=a/b.ml"
-          from merge_fmt root root root root;
-        print_file "result.ml"
-      in
-      merge ~from:".";
+      merge_with_relative_name ~from:".";
       [%expect
         {|
         File result.ml
         type t = { a : int; b : string }
-        |}];
-      merge ~from:"c";
+        |}])
+
+let%expect_test "relative name, from a subdirectory of a git repository" =
+  within_temp_dir (fun () ->
+      git_init ();
+      merge_with_relative_name ~from:"c";
+      [%expect
+        {|
+        File result.ml
+        type t = { a : int; b : string }
+        |}])
+
+let%expect_test "relative name, from a subdirectory of a jj repository" =
+  within_temp_dir (fun () ->
+      Unix.mkdir ".jj" 0o700;
+      merge_with_relative_name ~from:"c";
+      [%expect
+        {|
+        File result.ml
+        type t = { a : int; b : string }
+        |}])
+
+let%expect_test "relative name, outside of a repository" =
+  within_temp_dir (fun () ->
+      merge_with_relative_name ~from:"c";
       [%expect
         {|
         File result.ml
