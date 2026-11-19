@@ -454,3 +454,41 @@ let%expect_test "conflicts in diff3 style" =
         let x = 3
         >>>>>>> other.ml
         |}])
+
+let%expect_test "read-only dune merge inputs are preserved" =
+  within_temp_dir (fun () ->
+      let dune name libraries =
+        Printf.sprintf
+          "(executable\n(name %s)\n(modules a b c d e f g)\n(libraries %s))\n"
+          name libraries
+      in
+      let inputs =
+        [ ("base", dune "aaaa" "unix")
+        ; ( "current"
+          , "(executable\n\
+            \ (name aaaa)\n\
+            \ (modules a b c d e f g)\n\
+            \ (libraries unix str))\n" )
+        ; ("other", dune "bbbb" "unix")
+        ]
+      in
+      List.iter inputs ~f:(fun (filename, contents) ->
+          Out_channel.write_all filename ~data:contents;
+          Unix.chmod filename 0o444);
+      Out_channel.write_all "result" ~data:"";
+      system
+        "%s mergetool --base=base --current=current --other=other -o result \
+         --name=dune"
+        merge_fmt;
+      List.iter inputs ~f:(fun (filename, contents) ->
+          assert (String.equal (In_channel.read_all filename) contents);
+          assert (Int.equal (Unix.stat filename).st_perm 0o444));
+      print_file "result";
+      [%expect
+        {|
+        File result
+        (executable
+         (name bbbb)
+         (modules a b c d e f g)
+         (libraries unix str))
+        |}])
