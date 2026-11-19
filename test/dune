@@ -4,7 +4,7 @@
  (inline_tests)
  (preprocessor_deps ../src/merge_fmt.exe)
  (preprocess
-  (pps ppx_expect)))
+  (pps ppx_devtools-expect)))
 
 ;; [rebase_a.ml] and [rebase_b.ml] should be the same expect that
 ;; [rebase_b.ml] does rebase in an intermediate revision.

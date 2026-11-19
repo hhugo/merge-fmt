@@ -27,7 +27,7 @@
    (>= 1.1.0))
   base
   stdio
-  (ppx_expect :with-test)
+  (ppx_devtools-expect :with-test)
   (core_unix :with-test)
   (ocamlformat
    (and
