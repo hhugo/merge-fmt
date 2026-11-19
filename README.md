@@ -45,9 +45,13 @@ git config --local merge.default 'mergefmt'
 
 ### As a Jujutsu merge tool
 `merge-fmt` can act as a jujutsu [merge tool](https://docs.jj-vcs.dev/latest/config/#3-way-merge-tools-for-conflict-resolution).
-Configure the current jj repository with
+This requires jj 0.33 or later.
+
+`merge-fmt setup-jj-mergetool` prints the commands that configure the current
+jj repository. Run them, or let merge-fmt do it with
+`merge-fmt setup-jj-mergetool --update`.
 ```
-merge-fmt setup-jj-mergetool
+$ merge-fmt setup-jj-mergetool
 jj config set --repo merge-tools.merge-fmt.program '"merge-fmt"'
 jj config set --repo merge-tools.merge-fmt.merge-args '["mergetool", "--base=$base", "--current=$left", "--other=$right", "-o", "$output", "--name=$path", "--diff3"]'
 jj config set --repo merge-tools.merge-fmt.merge-conflict-exit-codes '[1]'
@@ -57,6 +61,8 @@ Then, use `jj resolve` to resolve conflicts with
 ```
 jj resolve --tool merge-fmt
 ```
+Conflicts that are still there once the files are formatted are left for you
+to resolve.
 
 Install
 -------
