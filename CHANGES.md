@@ -1,3 +1,16 @@
+## Unreleased
+
+- Fix the handling of file names when resolving conflicts: names containing
+  spaces made `merge-fmt` fail, and shell special characters in names were
+  interpreted by the shell.
+- The versions of a file being merged are no longer written next to it
+  (`a.ours.ml`, `a.theirs.ml`, `a.common.ml`), where they were left behind
+  when some conflicts remained.
+- Fix the formatting of dune files failing when the temporary directory is
+  on another filesystem.
+- `mergetool`: dune files are no longer formatted in place: the files given
+  with `--current`, `--base` and `--other` are left untouched.
+
 ## 0.5 (2026-11-19)
 
 - Add `setup-jj-mergetool`, to use merge-fmt as a Jujutsu merge tool. (#15)
