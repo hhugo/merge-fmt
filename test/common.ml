@@ -46,10 +46,19 @@ let print_file file =
   printf "File %s\n" file;
   print_endline (In_channel.read_all file)
 
+(* Recent versions of git print "Could not apply <sha>... # <subject>" where
+   older ones print "Could not apply <sha>... <subject>". Normalize to the
+   older form. *)
+let normalize_could_not_apply s =
+  if String.is_prefix ~prefix:"Could not apply " (String.strip s)
+  then String.substr_replace_first s ~pattern:"... # " ~with_:"... "
+  else s
+
 let filter_hint expected =
   String.split ~on:'\n' expected
   |> List.filter ~f:(fun s ->
       not (String.is_prefix ~prefix:"hint:" (String.strip s)))
+  |> List.map ~f:normalize_could_not_apply
   |> String.concat ~sep:"\n" |> print_string
 
 let git_init () =
@@ -87,6 +96,9 @@ let within_temp_dir ?(links = []) f =
       Core_unix.unsetenv "GIT_CONFIG";
       Core_unix.unsetenv "HOME";
       Core_unix.unsetenv "XDG_CONFIG_HOME";
+      (* The tests run under dune; make nested dune invocations behave as if
+         run by a user (no missing dune-project warning, no stray _build). *)
+      Core_unix.unsetenv "INSIDE_DUNE";
 
       Core_unix.putenv ~key:"GIT_COMMITTER_NAME" ~data:"John Doe";
       Core_unix.putenv ~key:"GIT_COMMITTER_DATE"
