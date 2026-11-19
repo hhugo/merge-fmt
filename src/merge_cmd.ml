@@ -75,7 +75,9 @@ let cmd =
   let result_name =
     let doc = "pathname in which the merged result will be stored" in
     Arg.(
-      value & opt (some file) None & info [ "name" ] ~docv:"<result-name>" ~doc)
+      value
+      & opt (some string) None
+      & info [ "name" ] ~docv:"<result-name>" ~doc)
   in
   let doc = "git mergetool" in
   let term =
