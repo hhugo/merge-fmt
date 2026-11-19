@@ -31,5 +31,5 @@
   (core_unix :with-test)
   (ocamlformat
    (and
-    (= 0.27.0)
+    (= 0.29.0)
     :with-test))))
