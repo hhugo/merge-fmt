@@ -3,6 +3,9 @@
 - `mergetool`: `--name` no longer needs to be the path of an existing file.
 - `mergetool`: when no formatter is found, write the result to the output
   given with `-o` instead of modifying the current file in place.
+- `mergetool`: when the merge has conflicts, write the result, with its
+  conflict markers, to the output and exit with 1. When the merge fails,
+  leave the output untouched.
 
 ## 0.3 (2023-02-18)
 
