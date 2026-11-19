@@ -4,15 +4,58 @@ open! Stdio
 let ( ^/ ) = Stdlib.Filename.concat
 let echo = ref false
 
+(* [Unix], extended with what the tests need. The standard library has no
+   [unsetenv]: unset variables are recorded here and removed from the
+   environment of the processes we start. *)
+module Unix = struct
+  include Unix
+
+  let unset = ref []
+  let unsetenv key = unset := key :: !unset
+
+  let putenv ~key ~data =
+    unset := List.filter !unset ~f:(fun k -> not (String.equal k key));
+    putenv key data
+
+  let environment () =
+    Array.filter (environment ()) ~f:(fun binding ->
+        not
+          (List.exists !unset ~f:(fun key ->
+               String.is_prefix binding ~prefix:(key ^ "="))))
+
+  let spawn s ~stdout =
+    create_process_env "/bin/sh" [| "/bin/sh"; "-c"; s |] (environment ()) stdin
+      stdout stderr
+
+  let system s = snd (waitpid [] (spawn s ~stdout))
+
+  let open_process_in s =
+    let r, w = pipe ~cloexec:true () in
+    let (_ : int) = spawn s ~stdout:w in
+    close w;
+    in_channel_of_descr r
+
+  let temp_dir ?(in_dir = Stdlib.Filename.get_temp_dir_name ()) prefix suffix =
+    let rec loop () =
+      let dir =
+        in_dir
+        ^/ Printf.sprintf "%s%06x%s" prefix (Stdlib.Random.bits ()) suffix
+      in
+      match mkdir dir 0o700 with
+      | () -> dir
+      | exception Unix_error (EEXIST, _, _) -> loop ()
+    in
+    loop ()
+end
+
 let system fmt =
   Printf.ksprintf
     (fun s ->
       if !echo then eprintf "+ %s\n%!" s;
-      let p = Core_unix.system s in
-      match p with
-      | Ok () -> ()
-      | Error (`Signal _) -> printf "Signaled\n"
-      | Error (`Exit_non_zero n) -> printf "Exit with %d\n" n)
+      match Unix.system s with
+      | WEXITED 0 -> ()
+      | WEXITED n -> printf "Exit with %d\n" n
+      | WSIGNALED _ | WSTOPPED _ -> printf "Signaled\n")
     fmt
 
 let git_add fn = system "git add %s" fn
@@ -76,7 +119,7 @@ let resolve () = system "%s" merge_fmt
 let with_temp_dir f =
   let in_dir = Sys.getenv "TMPDIR" in
   let keep_tmp_dir = Option.is_some (Sys.getenv "KEEP_EXPECT_TEST_DIR") in
-  let dir = Filename_unix.temp_dir ?in_dir "expect-" "-test" in
+  let dir = Unix.temp_dir ?in_dir "expect-" "-test" in
   (* Note that this blocks *)
   assert (not (Stdlib.Filename.is_relative dir));
   let res = match f dir with x -> Ok x | exception e -> Error e in
@@ -90,29 +133,27 @@ let within_temp_dir ?(links = []) f =
   let (_ : int) = Unix.umask 0o077 in
   with_temp_dir (fun temp_dir ->
       (* disable all external git configuration configuration *)
-      Core_unix.putenv ~key:"GIT_CONFIG_NOSYSTEM" ~data:"1";
-      Core_unix.putenv ~key:"GIT_CONFIG_NOGLOBAL" ~data:"1";
+      Unix.putenv ~key:"GIT_CONFIG_NOSYSTEM" ~data:"1";
+      Unix.putenv ~key:"GIT_CONFIG_NOGLOBAL" ~data:"1";
 
-      Core_unix.unsetenv "GIT_CONFIG";
-      Core_unix.unsetenv "HOME";
-      Core_unix.unsetenv "XDG_CONFIG_HOME";
+      Unix.unsetenv "GIT_CONFIG";
+      Unix.unsetenv "HOME";
+      Unix.unsetenv "XDG_CONFIG_HOME";
       (* The tests run under dune; make nested dune invocations behave as if
          run by a user (no missing dune-project warning, no stray _build). *)
-      Core_unix.unsetenv "INSIDE_DUNE";
+      Unix.unsetenv "INSIDE_DUNE";
 
-      Core_unix.putenv ~key:"GIT_COMMITTER_NAME" ~data:"John Doe";
-      Core_unix.putenv ~key:"GIT_COMMITTER_DATE"
-        ~data:"2020-12-03 19:00:00 +0000";
-      Core_unix.putenv ~key:"GIT_COMMITTER_EMAIL" ~data:"johndoe@doe.com";
-      Core_unix.putenv ~key:"GIT_AUTHOR_NAME" ~data:"John Doe";
-      Core_unix.putenv ~key:"GIT_AUTHOR_EMAIL" ~data:"johndoe@doe.com";
-      Core_unix.putenv ~key:"GIT_AUTHOR_DATE" ~data:"2020-12-03 19:00:00 +0000";
-      Core_unix.putenv ~key:"GIT_EDITOR" ~data:"true";
+      Unix.putenv ~key:"GIT_COMMITTER_NAME" ~data:"John Doe";
+      Unix.putenv ~key:"GIT_COMMITTER_DATE" ~data:"2020-12-03 19:00:00 +0000";
+      Unix.putenv ~key:"GIT_COMMITTER_EMAIL" ~data:"johndoe@doe.com";
+      Unix.putenv ~key:"GIT_AUTHOR_NAME" ~data:"John Doe";
+      Unix.putenv ~key:"GIT_AUTHOR_EMAIL" ~data:"johndoe@doe.com";
+      Unix.putenv ~key:"GIT_AUTHOR_DATE" ~data:"2020-12-03 19:00:00 +0000";
+      Unix.putenv ~key:"GIT_EDITOR" ~data:"true";
       let path_var = "PATH" in
       let old_path = Sys.getenv_exn path_var in
       let bin = temp_dir ^/ "bin" in
-      Core_unix.putenv ~key:path_var
-        ~data:(String.concat ~sep:":" [ bin; old_path ]);
+      Unix.putenv ~key:path_var ~data:(String.concat ~sep:":" [ bin; old_path ]);
       let () = system "mkdir %s" bin in
       let () =
         List.iter links ~f:(fun (file, action, link_as) ->
@@ -127,7 +168,7 @@ let within_temp_dir ?(links = []) f =
       in
       let () = Unix.chdir temp_dir in
       let res = match f () with x -> Ok x | exception e -> Error e in
-      Core_unix.putenv ~key:path_var ~data:old_path;
+      Unix.putenv ~key:path_var ~data:old_path;
       Unix.chdir cwd;
       Result.ok_exn res)
 

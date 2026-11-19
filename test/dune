@@ -1,6 +1,6 @@
 (library
  (name merge_fmt_test)
- (libraries base stdio unix core_unix core_unix.filename_unix)
+ (libraries base stdio unix)
  (inline_tests)
  (preprocessor_deps ../src/merge_fmt.exe)
  (preprocess

@@ -28,7 +28,6 @@
   base
   stdio
   (ppx_devtools-expect :with-test)
-  (core_unix :with-test)
   (ocamlformat
    (and
     (= 0.29.0)

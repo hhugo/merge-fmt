@@ -16,7 +16,6 @@ depends: [
   "base"
   "stdio"
   "ppx_devtools-expect" {with-test}
-  "core_unix" {with-test}
   "ocamlformat" {= "0.29.0" & with-test}
   "odoc" {with-doc}
 ]
