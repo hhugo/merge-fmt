@@ -22,6 +22,17 @@ let open_process_in_respect_exit ~echo fmt =
       | WSIGNALED _ | WSTOPPED _ -> Stdlib.exit 1)
     fmt
 
+let open_process_in_status ~echo fmt =
+  Printf.ksprintf
+    (fun s ->
+      if echo then eprintf "+ %s\n%!" s;
+      let ic = Unix.open_process_in s in
+      let contents = In_channel.input_all ic in
+      match Unix.close_process_in ic with
+      | WEXITED n -> (contents, n)
+      | WSIGNALED _ | WSTOPPED _ -> Stdlib.exit 1)
+    fmt
+
 let system ~echo fmt =
   Printf.ksprintf
     (fun s ->
