@@ -14,6 +14,10 @@
   merged file written to the standard output. (#34)
 - The tests now pass on macOS, Windows and Alpine. OCaml 4.14 is required.
   (#34)
+- Fix the formatting of dune files failing when the temporary directory is
+  on another filesystem.
+- `mergetool`: dune files are no longer formatted in place: the files given
+  with `--current`, `--base` and `--other` are left untouched.
 
 ## 0.5 (2026-11-19)
 
