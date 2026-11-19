@@ -18,9 +18,13 @@ let debug fmt =
    with the number of conflicts, or with a larger value on error. When there
    are conflicts, the result is still written: it contains the conflict
    markers. On error, there is no result and the output is left untouched. *)
-let merge_file ~echo ~current ~base ~other ~output =
+let merge_file ~echo ~labels:(current_label, base_label, other_label) ~current
+    ~base ~other ~output =
   let result, code =
-    open_process_in_status ~echo "git merge-file -p %s %s %s"
+    open_process_in_status ~echo "git merge-file -p -L %s -L %s -L %s %s %s %s"
+      (Stdlib.Filename.quote current_label)
+      (Stdlib.Filename.quote base_label)
+      (Stdlib.Filename.quote other_label)
       (Stdlib.Filename.quote current)
       (Stdlib.Filename.quote base)
       (Stdlib.Filename.quote other)
@@ -61,10 +65,13 @@ let merge config echo current base other output name =
       let name =
         Some (Option.value_map name ~default:current ~f:resolve_name)
       in
+      (* The files may be formatted into temporary files: keep the names of
+         the original ones in the conflict markers. *)
+      let labels = (current, base, other) in
       match Fmters.find ~config ~filename:current ~name with
       | None ->
           debug "Couldn't find a formatter for %s\n%!" current;
-          merge_file ~echo ~current ~base ~other ~output
+          merge_file ~echo ~labels ~current ~base ~other ~output
       | Some formatter -> (
           let format filename =
             Fmters.format_to_file formatter ~echo ~filename
@@ -76,7 +83,7 @@ let merge config echo current base other output name =
           | Ok ([ current; other; base ] : string list) ->
               debug "process all three revision successfully\n%!";
               debug "running git merge-file\n%!";
-              merge_file ~echo ~current ~base ~other ~output
+              merge_file ~echo ~labels ~current ~base ~other ~output
           | Error _ | Ok _ -> Stdlib.exit 1))
 
 open Cmdliner
