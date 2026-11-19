@@ -49,7 +49,7 @@ let print_file file =
 let filter_hint expected =
   String.split ~on:'\n' expected
   |> List.filter ~f:(fun s ->
-         not (String.is_prefix ~prefix:"hint:" (String.strip s)))
+      not (String.is_prefix ~prefix:"hint:" (String.strip s)))
   |> String.concat ~sep:"\n" |> print_string
 
 let git_init () =
