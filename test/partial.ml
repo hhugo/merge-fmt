@@ -119,52 +119,7 @@ let x = 5
         =======
         let x = 5
         >>>>>>> b.theirs.ml
-
-        ?? File b.common.ml
-        type t =
-          { a : int
-          ; b : string
-          ; c : float
-          }
-
-        ?? File b.ours.ml
-        type t =
-          { a : int
-          ; b : string
-          ; c : float
-          ; d : unit option
-          }
-
-        let y = 0
-
-        (** doc *)
-        let x = 1
-
-        ?? File b.theirs.ml
-        type t =
-          { a : int option
-          ; b : string
-          ; c : float
-          }
-
-        let y = 0
-
-        (** doc *)
-        let x = 5 |}];
-      system "git merge-file -p b.ours.ml b.common.ml b.theirs.ml --ours";
-      [%expect
-        {|
-        type t =
-          { a : int option
-          ; b : string
-          ; c : float
-          ; d : unit option
-          }
-
-        let y = 0
-
-        (** doc *)
-        let x = 1 |}];
+ |}];
       system "git add b.ml";
       [%expect {||}];
       system "git rebase --continue";

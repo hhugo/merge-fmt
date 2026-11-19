@@ -1,3 +1,12 @@
+## Unreleased
+
+- Fix the handling of file names when resolving conflicts: names containing
+  spaces made `merge-fmt` fail, and shell special characters in names were
+  interpreted by the shell.
+- The versions of a file being merged are no longer written next to it
+  (`a.ours.ml`, `a.theirs.ml`, `a.common.ml`), where they were left behind
+  when some conflicts remained.
+
 ## 0.5 (2026-11-19)
 
 - Add `setup-jj-mergetool`, to use merge-fmt as a Jujutsu merge tool. (#15)

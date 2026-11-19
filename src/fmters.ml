@@ -61,9 +61,12 @@ let find ~config ~filename ~name =
 
 let run t ~echo ~filename =
   match t with
-  | File (_, command) -> system ~echo "%s %s" command filename
+  | File (_, command) ->
+      system ~echo "%s %s" command (Stdlib.Filename.quote filename)
   | Stdout t -> (
-      let ic = open_process_in ~echo "%s %s" t filename in
+      let ic =
+        open_process_in ~echo "%s %s" t (Stdlib.Filename.quote filename)
+      in
       let tmp_file, oc = Stdlib.Filename.open_temp_file "merge-fmt" "stdout" in
       transfer ic oc;
       Stdlib.close_out oc;
