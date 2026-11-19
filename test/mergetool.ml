@@ -263,3 +263,67 @@ let%expect_test "without a formatter, conflicts are written to the output" =
         d
         e
         |}])
+
+(* FIXME: a relative [--name] is interpreted relative to the current
+   directory. Tools such as jj pass a path relative to the root of the
+   repository, whatever the current directory is. Below, [a/b.ml] should be
+   formatted using [a/.ocamlformat] (default profile) in both cases. From the
+   subdirectory [c], the configuration at the root (janestreet profile) is
+   used instead. *)
+let%expect_test "relative name, from a subdirectory" =
+  within_temp_dir (fun () ->
+      git_init ();
+      Unix.mkdir "a" 0o700;
+      Unix.mkdir "c" 0o700;
+      Out_channel.write_all "a/.ocamlformat" ~data:"profile=default\n";
+      let merge ~from =
+        List.iter [ "base"; "current"; "other" ] ~f:(fun side ->
+            Out_channel.write_all (side ^ ".ml")
+              ~data:"type t={a:int;b:string}\n");
+        Out_channel.write_all "result.ml" ~data:"";
+        let root = Unix.getcwd () in
+        system
+          "cd %s && %s mergetool --base=%s/base.ml --current=%s/current.ml \
+           --other=%s/other.ml -o %s/result.ml --name=a/b.ml"
+          from merge_fmt root root root root;
+        print_file "result.ml"
+      in
+      merge ~from:".";
+      [%expect
+        {|
+        File result.ml
+        type t = { a : int; b : string }
+        |}];
+      merge ~from:"c";
+      [%expect
+        {|
+        File result.ml
+        type t =
+          { a : int
+          ; b : string
+          }
+        |}])
+
+(* FIXME: when the formatted files conflict, nothing is written to the
+   output. The result of the merge, with its conflict markers, should be
+   written, as is done when there is no formatter. *)
+let%expect_test "with a formatter, conflicts are not written to the output" =
+  within_temp_dir (fun () ->
+      git_init ();
+      List.iter
+        [ ("base.ml", "let x=1\n")
+        ; ("current.ml", "let x=2\n")
+        ; ("other.ml", "let x=3\n")
+        ]
+        ~f:(fun (filename, contents) ->
+          Out_channel.write_all filename ~data:contents);
+      Out_channel.write_all "result.ml" ~data:"";
+      system
+        "%s mergetool --base=base.ml --current=current.ml --other=other.ml -o \
+         result.ml --name=result.ml"
+        merge_fmt;
+      print_file "result.ml";
+      [%expect {|
+        Exit with 1
+        File result.ml
+        |}])
