@@ -64,6 +64,7 @@ let merge config echo current base other output name diff3 =
   | (None | Some ""), _, _ | _, (None | Some ""), _ | _, _, (None | Some "") ->
       Stdlib.exit 1
   | Some current, Some base, Some other -> (
+      let display_name = Option.value name ~default:current in
       let name =
         Some (Option.value_map name ~default:current ~f:resolve_name)
       in
@@ -86,7 +87,16 @@ let merge config echo current base other output name diff3 =
               debug "process all three revision successfully\n%!";
               debug "running git merge-file\n%!";
               merge_file ~echo ~diff3 ~labels ~current ~base ~other ~output
-          | Error _ | Ok _ -> Stdlib.exit 1))
+          | Ok _ -> assert false
+          | Error failed ->
+              (* Do what would be done without merge-fmt, rather than failing
+                 a merge that might not even conflict. *)
+              eprintf
+                "merge-fmt: failed to format %s (%s), merging without formatting\n\
+                 %!"
+                display_name
+                (String.concat ~sep:", " failed);
+              merge_file ~echo ~diff3 ~labels ~current ~base ~other ~output))
 
 open Cmdliner
 
