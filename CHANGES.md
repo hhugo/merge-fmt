@@ -1,3 +1,7 @@
+## Unreleased
+
+- `mergetool`: `--name` no longer needs to be the path of an existing file.
+
 ## 0.3 (2023-02-18)
 
 - Add support of dune formatter. (#3)

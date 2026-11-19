@@ -190,3 +190,26 @@ type t =
         {|
         [detached HEAD 2df8de0] third commit (fork)
          1 file changed, 2 insertions(+) |}])
+
+let%expect_test "the result name does not need to exist" =
+  within_temp_dir (fun () ->
+      git_init ();
+      List.iter
+        [ ("base.ml", "let x=1\nlet y=2\n")
+        ; ("current.ml", "let x = 1\nlet y = 2\n")
+        ; ("other.ml", "let x=42\nlet y=2\n")
+        ]
+        ~f:(fun (filename, contents) ->
+          Out_channel.write_all filename ~data:contents);
+      Out_channel.write_all "result.ml" ~data:"";
+      system
+        "%s mergetool --base=base.ml --current=current.ml --other=other.ml -o \
+         result.ml --name=missing/dir/new.ml"
+        merge_fmt;
+      print_file "result.ml";
+      [%expect
+        {|
+        File result.ml
+        let x = 42
+        let y = 2
+        |}])
