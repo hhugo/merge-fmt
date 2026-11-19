@@ -13,6 +13,11 @@
 - `mergetool`: when the formatter fails, merge the files as they are instead
   of failing. A merge that does not conflict no longer becomes a conflict
   because a file could not be formatted.
+- `setup-mergetool`: pass `--name` to `mergetool`, so that dune files are
+  formatted with `git mergetool`, and quote the file names.
+- Fix the option passed to `refmt` to format Reason files in place.
+- Fail when a version of a conflicted file cannot be read from git, instead
+  of using an empty file.
 
 ## 0.5 (2026-11-19)
 

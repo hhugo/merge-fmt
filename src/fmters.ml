@@ -28,7 +28,7 @@ let ocamlformat ~bin ~name ~output =
   File (Copy, sprintf "%s -o %s" command (Stdlib.Filename.quote output))
 
 let refmt ~bin =
-  File (Inplace, sprintf "%s --inplace" (Option.value ~default:"refmt" bin))
+  File (Inplace, sprintf "%s --in-place" (Option.value ~default:"refmt" bin))
 
 let dune ~bin =
   Stdout (sprintf "%s format-dune-file --" (Option.value ~default:"dune" bin))

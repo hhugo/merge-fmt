@@ -68,9 +68,14 @@ let show ~echo version versions =
     | Common -> versions.common
   in
   match obj with
-  | Object obj ->
-      open_process_in ~echo "git show %s" (Stdlib.Filename.quote obj)
-      |> In_channel.input_all
+  | Object obj -> (
+      match
+        open_process_in_status ~echo "git show %s" (Stdlib.Filename.quote obj)
+      with
+      | content, 0 -> content
+      | _ ->
+          eprintf "Failed to read object %s\n%!" obj;
+          Stdlib.exit 1)
 
 (* The name used to refer to a version of [fn], in conflict markers for
    instance. *)
