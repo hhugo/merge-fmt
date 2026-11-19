@@ -8,7 +8,8 @@ let mergetool =
     let commands =
       [ sprintf
           "git config --local mergetool.mergefmt.cmd '%s mergetool \
-           --base=$BASE --current=$LOCAL --other=$REMOTE -o $MERGED'"
+           --base=\"$BASE\" --current=\"$LOCAL\" --other=\"$REMOTE\" -o \
+           \"$MERGED\" --name=\"$MERGED\"'"
           merge_fmt_path
       ; "git config --local mergetool.mergefmt.trustExitCode true"
       ]

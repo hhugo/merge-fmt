@@ -1,3 +1,24 @@
+## Unreleased
+
+- Fix the handling of file names when resolving conflicts: names containing
+  spaces made `merge-fmt` fail, and shell special characters in names were
+  interpreted by the shell.
+- The versions of a file being merged are no longer written next to it
+  (`a.ours.ml`, `a.theirs.ml`, `a.common.ml`), where they were left behind
+  when some conflicts remained.
+- Fix the formatting of dune files failing when the temporary directory is
+  on another filesystem.
+- `mergetool`: dune files are no longer formatted in place: the files given
+  with `--current`, `--base` and `--other` are left untouched.
+- `mergetool`: when the formatter fails, merge the files as they are instead
+  of failing. A merge that does not conflict no longer becomes a conflict
+  because a file could not be formatted.
+- `setup-mergetool`: pass `--name` to `mergetool`, so that dune files are
+  formatted with `git mergetool`, and quote the file names.
+- Fix the option passed to `refmt` to format Reason files in place.
+- Fail when a version of a conflicted file cannot be read from git, instead
+  of using an empty file.
+
 ## 0.5 (2026-11-19)
 
 - Add `setup-jj-mergetool`, to use merge-fmt as a Jujutsu merge tool. (#15)
