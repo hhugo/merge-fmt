@@ -9,6 +9,10 @@ OPTIONS
 
        --current=<current-file>
 
+       --diff3
+           Show conflicts in diff3 style: the conflict markers also contain
+           the content of the base.
+
        --dune=VAL
            dune path
 

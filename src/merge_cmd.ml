@@ -18,10 +18,12 @@ let debug fmt =
    with the number of conflicts, or with a larger value on error. When there
    are conflicts, the result is still written: it contains the conflict
    markers. On error, there is no result and the output is left untouched. *)
-let merge_file ~echo ~labels:(current_label, base_label, other_label) ~current
-    ~base ~other ~output =
+let merge_file ~echo ~diff3 ~labels:(current_label, base_label, other_label)
+    ~current ~base ~other ~output =
   let result, code =
-    open_process_in_status ~echo "git merge-file -p -L %s -L %s -L %s %s %s %s"
+    open_process_in_status ~echo
+      "git merge-file -p%s -L %s -L %s -L %s %s %s %s"
+      (if diff3 then " --diff3" else "")
       (Stdlib.Filename.quote current_label)
       (Stdlib.Filename.quote base_label)
       (Stdlib.Filename.quote other_label)
@@ -57,7 +59,7 @@ let resolve_name name =
     | Some root -> Stdlib.Filename.concat root name
     | None -> name
 
-let merge config echo current base other output name =
+let merge config echo current base other output name diff3 =
   match (current, base, other) with
   | (None | Some ""), _, _ | _, (None | Some ""), _ | _, _, (None | Some "") ->
       Stdlib.exit 1
@@ -71,7 +73,7 @@ let merge config echo current base other output name =
       match Fmters.find ~config ~filename:current ~name with
       | None ->
           debug "Couldn't find a formatter for %s\n%!" current;
-          merge_file ~echo ~labels ~current ~base ~other ~output
+          merge_file ~echo ~diff3 ~labels ~current ~base ~other ~output
       | Some formatter -> (
           let format filename =
             Fmters.format_to_file formatter ~echo ~filename
@@ -83,7 +85,7 @@ let merge config echo current base other output name =
           | Ok ([ current; other; base ] : string list) ->
               debug "process all three revision successfully\n%!";
               debug "running git merge-file\n%!";
-              merge_file ~echo ~labels ~current ~base ~other ~output
+              merge_file ~echo ~diff3 ~labels ~current ~base ~other ~output
           | Error _ | Ok _ -> Stdlib.exit 1))
 
 open Cmdliner
@@ -120,10 +122,17 @@ let cmd =
       & opt (some string) None
       & info [ "name" ] ~docv:"<result-name>" ~doc)
   in
+  let diff3 =
+    let doc =
+      "Show conflicts in diff3 style: the conflict markers also contain the \
+       content of the base."
+    in
+    Arg.(value & flag & info [ "diff3" ] ~doc)
+  in
   let doc = "git mergetool" in
   let term =
     Term.(
       const merge $ Fmters.Flags.t $ Flags.echo $ current $ base $ other
-      $ output $ result_name)
+      $ output $ result_name $ diff3)
   in
   Cmd.v (Cmd.info ~doc "mergetool") term
