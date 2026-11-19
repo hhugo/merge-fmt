@@ -82,7 +82,13 @@ let jj_mergetool =
           (Stdlib.Filename.quote (sprintf "%S" merge_fmt_path))
       ; "jj config set --repo merge-tools.merge-fmt.merge-args \
          '[\"mergetool\", \"--base=$base\", \"--current=$left\", \
-         \"--other=$right\", \"-o\", \"$output\", \"--name=$path\"]'"
+         \"--other=$right\", \"-o\", \"$output\", \"--name=$path\", \
+         \"--diff3\"]'"
+        (* When there are conflicts, merge-fmt exits with 1 and writes the
+           conflict markers to the output. jj only reads them back when they
+           contain the base, hence [--diff3] above. *)
+      ; "jj config set --repo merge-tools.merge-fmt.merge-conflict-exit-codes \
+         '[1]'"
       ]
     in
     List.iter commands ~f:(fun line ->

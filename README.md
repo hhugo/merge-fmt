@@ -49,7 +49,8 @@ Configure the current jj repository with
 ```
 merge-fmt setup-jj-mergetool
 jj config set --repo merge-tools.merge-fmt.program '"merge-fmt"'
-jj config set --repo merge-tools.merge-fmt.merge-args '["mergetool", "--base=$base", "--current=$left", "--other=$right", "-o", "$output", "--name=$path"]'
+jj config set --repo merge-tools.merge-fmt.merge-args '["mergetool", "--base=$base", "--current=$left", "--other=$right", "-o", "$output", "--name=$path", "--diff3"]'
+jj config set --repo merge-tools.merge-fmt.merge-conflict-exit-codes '[1]'
 ```
 
 Then, use `jj resolve` to resolve conflicts with

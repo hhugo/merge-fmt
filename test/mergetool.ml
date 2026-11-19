@@ -425,3 +425,32 @@ let%expect_test "omitted name uses the original input configuration" =
           ; c : float
           }
         |}])
+
+let%expect_test "conflicts in diff3 style" =
+  within_temp_dir (fun () ->
+      git_init ();
+      List.iter
+        [ ("base.ml", "let x=1\n")
+        ; ("current.ml", "let x=2\n")
+        ; ("other.ml", "let x=3\n")
+        ]
+        ~f:(fun (filename, contents) ->
+          Out_channel.write_all filename ~data:contents);
+      Out_channel.write_all "result.ml" ~data:"";
+      system
+        "%s mergetool --base=base.ml --current=current.ml --other=other.ml -o \
+         result.ml --name=result.ml --diff3"
+        merge_fmt;
+      print_file "result.ml";
+      [%expect
+        {|
+        Exit with 1
+        File result.ml
+        <<<<<<< current.ml
+        let x = 2
+        ||||||| base.ml
+        let x = 1
+        =======
+        let x = 3
+        >>>>>>> other.ml
+        |}])
