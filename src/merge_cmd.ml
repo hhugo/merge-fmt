@@ -36,7 +36,11 @@ let merge_file ~echo ~diff3 ~labels:(current_label, base_label, other_label)
   else (
     (match output with
     | None -> Out_channel.output_string stdout result
-    | Some o -> Out_channel.write_all o ~data:result);
+    | Some o -> (
+        try Out_channel.write_all o ~data:result
+        with Sys_error msg ->
+          eprintf "merge-fmt: cannot write the result: %s\n%!" msg;
+          Stdlib.exit 2));
     Stdlib.exit (if code = 0 then 0 else 1))
 
 (* The closest parent directory that is the root of a repository. *)
@@ -119,8 +123,12 @@ let cmd =
       value & opt (some file) None & info [ "other" ] ~docv:"<other-file>" ~doc)
   in
   let output =
-    let doc = "" in
-    Arg.(value & opt (some file) None & info [ "o" ] ~docv:"<output-to>" ~doc)
+    let doc =
+      "File the merged result is written to. It is created when it does not \
+       exist. Without this option, the result is written to the standard \
+       output."
+    in
+    Arg.(value & opt (some string) None & info [ "o" ] ~docv:"<output-to>" ~doc)
   in
   let result_name =
     let doc =

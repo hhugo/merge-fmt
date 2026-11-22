@@ -246,6 +246,33 @@ let%expect_test "without a formatter, the result is written to the output" =
         E
         |}])
 
+let%expect_test "the output is created when it does not exist" =
+  within_temp_dir (fun () ->
+      List.iter
+        [ ("base.txt", "a\nb\nc\n")
+        ; ("current.txt", "A\nb\nc\n")
+        ; ("other.txt", "a\nb\nC\n")
+        ]
+        ~f:(fun (filename, contents) ->
+          Out_channel.write_all filename ~data:contents);
+      let merge output =
+        system
+          "%s mergetool --base=base.txt --current=current.txt \
+           --other=other.txt -o %s 2>%s"
+          merge_fmt output Stdlib.Filename.null
+      in
+      merge "new.txt";
+      print_file "new.txt";
+      [%expect {|
+        File new.txt
+        A
+        b
+        C
+        |}];
+      (* Not an internal error, nor the exit code of a conflict. *)
+      merge (Stdlib.Filename.concat "missing" "new.txt");
+      [%expect {| Exit with 2 |}])
+
 let%expect_test "without a formatter, conflicts are written to the output" =
   within_temp_dir (fun () ->
       merge_txt ~current:"a\nb\nC1\nd\ne\n" ~other:"a\nb\nC2\nd\ne\n";
