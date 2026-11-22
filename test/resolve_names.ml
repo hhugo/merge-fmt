@@ -128,10 +128,41 @@ let%expect_test "a conflicted file missing from the working tree is ignored" =
       Unix.unlink "a.ml";
       resolve ();
       system "git status --short";
-      [%expect {|
+      [%expect
+        {|
                Ignore a.ml (missing from the working tree)
                Resolved 1/1 b.ml
                UU a.ml
                M  b.ml
                Exit with 1
+               |}])
+
+(* From a subdirectory, the conflicts of the whole repository are resolved. *)
+let%expect_test "resolve from a subdirectory" =
+  within_temp_dir (fun () ->
+      git_init ();
+      Unix.mkdir "sub" 0o700;
+      Unix.mkdir "other" 0o700;
+      let files = [ "sub/a.ml"; "other/b.ml" ] in
+      let commit x y msg =
+        List.iter files ~f:(fun filename ->
+            Out_channel.write_all filename ~data:(x ^ middle ^ y));
+        system "git add sub other";
+        git_commit msg
+      in
+      commit "let x=1\n" "let y=2\n" "base";
+      system "git checkout -q -b side";
+      commit "let x = 1\n" "let y = 22\n" "side";
+      system "git checkout -q -";
+      commit "let x=3\n" "let y=2\n" "main";
+      merge ();
+      [%expect {| Exit with 1 |}];
+      Unix.chdir "sub";
+      resolve ();
+      system "git status --short";
+      [%expect {|
+               Resolved 1/1 ../other/b.ml
+               Resolved 1/1 a.ml
+               M  ../other/b.ml
+               M  a.ml
                |}])
