@@ -104,6 +104,16 @@ let filter_hint expected =
   |> List.map ~f:normalize_could_not_apply
   |> String.concat ~sep:"\n" |> print_string
 
+(* On macOS, [git init] records extra settings describing the filesystem. *)
+let filter_macos_config output =
+  String.split ~on:'\n' output
+  |> List.filter ~f:(fun s ->
+      not
+        (List.mem
+           [ "core.ignorecase=true"; "core.precomposeunicode=true" ]
+           (String.strip s) ~equal:String.equal))
+  |> String.concat ~sep:"\n" |> print_string
+
 let git_init () =
   system "git init . -q";
   write ".ocamlformat" "profile=janestreet";
@@ -130,7 +140,8 @@ let with_temp_dir f =
 
 let within_temp_dir ?(links = []) f =
   let cwd = Unix.getcwd () in
-  let (_ : int) = Unix.umask 0o077 in
+  (* [Unix.umask] is not implemented on Windows. *)
+  if not Sys.win32 then ignore (Unix.umask 0o077 : int);
   with_temp_dir (fun temp_dir ->
       (* disable all external git configuration configuration *)
       Unix.putenv ~key:"GIT_CONFIG_NOSYSTEM" ~data:"1";
@@ -176,6 +187,7 @@ let%expect_test _ =
   within_temp_dir (fun () ->
       git_init ();
       system "git config -l";
+      filter_macos_config [%expect.output];
       [%expect
         {|
         core.repositoryformatversion=0
