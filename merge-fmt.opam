@@ -11,11 +11,12 @@ doc: "https://hhugo.github.io/merge-fmt/"
 bug-reports: "https://github.com/hhugo/merge-fmt/issues"
 depends: [
   "dune" {>= "3.15"}
-  "ocaml" {>= "4.8"}
+  "ocaml" {>= "4.14"}
   "cmdliner" {>= "1.1.0"}
   "base"
   "stdio"
   "ppx_devtools-expect" {with-test}
+  "conf-diffutils" {with-test}
   "ocamlformat" {= "0.29.0" & with-test}
   "odoc" {with-doc}
 ]
