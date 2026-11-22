@@ -108,3 +108,30 @@ let%expect_test "no file is left behind when conflicts remain" =
         let c = 0
         let y = 22
         |}])
+
+let%expect_test "a conflicted file missing from the working tree is ignored" =
+  within_temp_dir (fun () ->
+      git_init ();
+      let commit x y msg =
+        List.iter [ "a.ml"; "b.ml" ] ~f:(fun filename ->
+            Out_channel.write_all filename ~data:(x ^ middle ^ y));
+        system "git add a.ml b.ml";
+        git_commit msg
+      in
+      commit "let x=1\n" "let y=2\n" "base";
+      system "git checkout -q -b side";
+      commit "let x = 1\n" "let y = 22\n" "side";
+      system "git checkout -q -";
+      commit "let x=3\n" "let y=2\n" "main";
+      merge ();
+      [%expect {| Exit with 1 |}];
+      Unix.unlink "a.ml";
+      resolve ();
+      system "git status --short";
+      [%expect {|
+               Ignore a.ml (missing from the working tree)
+               Resolved 1/1 b.ml
+               UU a.ml
+               M  b.ml
+               Exit with 1
+               |}])

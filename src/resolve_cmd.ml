@@ -147,6 +147,8 @@ let resolve config echo () =
     Stdlib.exit 1);
   Map.iteri all ~f:(fun ~key:filename ~data:versions ->
       match versions with
+      | Ok _ when not (Stdlib.Sys.file_exists filename) ->
+          eprintf "Ignore %s (missing from the working tree)\n%!" filename
       | Ok versions -> (
           (* The versions are formatted from temporary files: tell the
              formatter which file they are. *)

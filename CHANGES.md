@@ -32,6 +32,8 @@
   with `--current`, `--base` and `--other` are left untouched.
 - Fail when a version of a conflicted file cannot be read from git, instead
   of using an empty file.
+- Fix a crash when a conflicted file is missing from the working tree: it is
+  now ignored, and the other files are still resolved.
 
 ## 0.5 (2026-11-19)
 
