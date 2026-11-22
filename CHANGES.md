@@ -21,6 +21,8 @@
 - `mergetool`: when the formatter fails, merge the files as they are instead
   of failing. A merge that does not conflict no longer becomes a conflict
   because a file could not be formatted.
+- `mergetool`: the file given with `-o` no longer needs to exist, it is
+  created.
 
 ## 0.5 (2026-11-19)
 

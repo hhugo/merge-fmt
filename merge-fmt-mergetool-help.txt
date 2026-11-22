@@ -24,6 +24,9 @@ OPTIONS
            it is relative to the root of the repository.
 
        -o <output-to>
+           File the merged result is written to. It is created when it does
+           not exist. Without this option, the result is written to the
+           standard output.
 
        --ocamlformat=VAL
            ocamlformat path
