@@ -8,7 +8,7 @@ let%expect_test _ =
   within_temp_dir (fun () ->
       git_init ();
       system "%s setup-mergetool --merge-fmt-path %s --update" merge_fmt
-        merge_fmt;
+        merge_fmt_path;
       [%expect {||}];
       write "a.ml"
         {|

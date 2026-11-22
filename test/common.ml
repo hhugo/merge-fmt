@@ -12,12 +12,17 @@ let echo = ref false
 
 (* [Unix], extended with what the tests need. The standard library has no
    [unsetenv]: unset variables are recorded here and removed from the
-   environment of the processes we start. *)
+   environment of the processes we start.
+
+   On Windows, there is no [/bin/sh]: the commands are run by [cmd.exe], as
+   merge-fmt does. Setting a variable to the empty string removes it there. *)
 module Unix = struct
   include Unix
 
   let unset = ref []
-  let unsetenv key = unset := key :: !unset
+
+  let unsetenv key =
+    if Sys.win32 then Unix.putenv key "" else unset := key :: !unset
 
   let putenv ~key ~data =
     unset := List.filter !unset ~f:(fun k -> not (String.equal k key));
@@ -29,20 +34,34 @@ module Unix = struct
           (List.exists !unset ~f:(fun key ->
                String.is_prefix binding ~prefix:(key ^ "="))))
 
-  (* There is no [/bin/sh] for a native Windows program: use the [sh] found
-     in the PATH, the one of Cygwin or MSYS2. *)
-  let sh = if Sys.win32 then "sh" else "/bin/sh"
-
   let spawn s ~stdout =
-    create_process_env sh [| sh; "-c"; s |] (environment ()) stdin stdout stderr
+    create_process_env "/bin/sh" [| "/bin/sh"; "-c"; s |] (environment ()) stdin
+      stdout stderr
 
-  let system s = snd (waitpid [] (spawn s ~stdout))
+  let system s =
+    if Sys.win32 then Unix.system s else snd (waitpid [] (spawn s ~stdout))
 
   let open_process_in s =
-    let r, w = pipe ~cloexec:true () in
-    let (_ : int) = spawn s ~stdout:w in
-    close w;
-    in_channel_of_descr r
+    if Sys.win32
+    then Unix.open_process_in s
+    else
+      let r, w = pipe ~cloexec:true () in
+      let (_ : int) = spawn s ~stdout:w in
+      close w;
+      in_channel_of_descr r
+
+  let rec rm_rf path =
+    match (lstat path).st_kind with
+    | S_DIR ->
+        Array.iter (Stdlib.Sys.readdir path) ~f:(fun name ->
+            rm_rf (path ^/ name));
+        rmdir path
+    | _ -> (
+        try unlink path
+        with Unix_error _ ->
+          (* On Windows, read-only files cannot be removed. *)
+          chmod path 0o600;
+          unlink path)
 
   let temp_dir ?(in_dir = Stdlib.Filename.get_temp_dir_name ()) prefix suffix =
     let rec loop () =
@@ -56,11 +75,6 @@ module Unix = struct
     in
     loop ()
 end
-
-(* A path, as given to the shell. On Windows, the shell would interpret the
-   backslashes: Cygwin and MSYS2 also understand [C:/dir/file]. *)
-let sh_path path =
-  if Sys.win32 then String.tr path ~target:'\\' ~replacement:'/' else path
 
 let system fmt =
   Printf.ksprintf
@@ -138,9 +152,15 @@ let git_init () =
   git_commit "initial"
 
 let merge_fmt =
-  let current_dir = Unix.getcwd () in
-  let tool = "../src/merge_fmt.exe" in
-  sh_path (Stdlib.Filename.concat current_dir tool)
+  Stdlib.Filename.dirname (Unix.getcwd ()) ^/ "src" ^/ "merge_fmt.exe"
+
+(* The path of merge-fmt, as recorded in the configuration of git. Git runs it
+   with a POSIX shell, even on Windows, where the backslashes would be
+   interpreted. That shell also understands [C:/dir/file]. *)
+let merge_fmt_path =
+  if Sys.win32
+  then String.tr merge_fmt ~target:'\\' ~replacement:'/'
+  else merge_fmt
 
 let resolve () = system "%s" merge_fmt
 
@@ -151,9 +171,7 @@ let with_temp_dir f =
   (* Note that this blocks *)
   assert (not (Stdlib.Filename.is_relative dir));
   let res = match f dir with x -> Ok x | exception e -> Error e in
-  if keep_tmp_dir
-  then eprintf "OUTPUT LEFT IN %s\n" dir
-  else system "rm -rf %s" (sh_path dir);
+  if keep_tmp_dir then eprintf "OUTPUT LEFT IN %s\n" dir else Unix.rm_rf dir;
   Result.ok_exn res
 
 let within_temp_dir ?(links = []) f =

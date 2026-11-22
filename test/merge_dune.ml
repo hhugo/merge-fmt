@@ -95,7 +95,8 @@ let%expect_test "custom merge tool" =
       git_init ();
       Unix.mkdir "lib" 0o700;
       let filename = "lib/dune" in
-      system "%s setup-merge --merge-fmt-path %s --update" merge_fmt merge_fmt;
+      system "%s setup-merge --merge-fmt-path %s --update" merge_fmt
+        merge_fmt_path;
       [%expect {||}];
 
       write filename {|
