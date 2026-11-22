@@ -18,7 +18,7 @@ let conflict_on filename =
   system "git checkout -q -";
   commit filename ("let x=3\n" ^ middle ^ "let y=2\n") "main"
 
-let merge () = system "git merge side >/dev/null 2>&1"
+let merge () = system "git merge side >%s 2>&1" Stdlib.Filename.null
 
 let%expect_test "file name with a space" =
   within_temp_dir (fun () ->
@@ -71,7 +71,7 @@ let%expect_test "shell special characters in a file name" =
       [%expect {| Exit with 1 |}];
       resolve ();
       system "git status --short";
-      system "ls";
+      list_files ();
       [%expect
         {|
         Resolved 1/1 a$(touch PWNED)`touch PWNED`;touch PWNED;.ml

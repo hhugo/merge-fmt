@@ -6,6 +6,13 @@
 - The versions of a file being merged are no longer written next to it
   (`a.ours.ml`, `a.theirs.ml`, `a.common.ml`), where they were left behind
   when some conflicts remained.
+- Windows: `setup-mergetool`, `setup-merge` and `setup-jj-mergetool` no longer
+  fail with `--update`, the commands they run relied on the quoting of a
+  POSIX shell. (#34)
+- Windows: line endings are no longer translated on the standard output,
+  where `mergetool` may write the merged file. (#34)
+- The tests now pass on macOS, Windows and Alpine. OCaml 4.14 is required.
+  (#34)
 
 ## 0.5 (2026-11-19)
 

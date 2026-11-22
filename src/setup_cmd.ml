@@ -2,21 +2,52 @@ open Base
 open Stdio
 open Common
 
+(* An argument of a command. Both are passed verbatim to the command, [Q]
+   ones are quoted when the command is printed. *)
+type arg =
+  | A of string
+  | Q of string
+
+(* Commands are printed for a POSIX shell. *)
+let print_command (prog, args) =
+  let quote s =
+    "'" ^ String.substr_replace_all s ~pattern:"'" ~with_:"'\\''" ^ "'"
+  in
+  prog :: List.map args ~f:(function A s -> s | Q s -> quote s)
+  |> String.concat ~sep:" "
+  |> Out_channel.printf "%s\n%!"
+
+(* Commands are run by the shell of the system, which is not a POSIX one on
+   Windows. *)
+let run_command ~echo (prog, args) =
+  system_respect_exit ~echo "%s"
+    (Stdlib.Filename.quote_command prog
+       (List.map args ~f:(function A s | Q s -> s)))
+
+let setup_commands ~update ~echo commands =
+  List.iter commands ~f:(if update then run_command ~echo else print_command)
+
 let mergetool =
   let setup update_git_config echo merge_fmt_path =
     let merge_fmt_path = Option.value ~default:"merge-fmt" merge_fmt_path in
-    let commands =
-      [ sprintf
-          "git config --local mergetool.mergefmt.cmd '%s mergetool \
-           --base=$BASE --current=$LOCAL --other=$REMOTE -o $MERGED'"
-          merge_fmt_path
-      ; "git config --local mergetool.mergefmt.trustExitCode true"
+    setup_commands ~update:update_git_config ~echo
+      [ ( "git"
+        , [ A "config"
+          ; A "--local"
+          ; A "mergetool.mergefmt.cmd"
+          ; Q
+              (sprintf
+                 "%s mergetool --base=$BASE --current=$LOCAL --other=$REMOTE \
+                  -o $MERGED"
+                 merge_fmt_path)
+          ] )
+      ; ( "git"
+        , [ A "config"
+          ; A "--local"
+          ; A "mergetool.mergefmt.trustExitCode"
+          ; A "true"
+          ] )
       ]
-    in
-    List.iter commands ~f:(fun line ->
-        if update_git_config
-        then system_respect_exit ~echo "%s" line
-        else Out_channel.printf "%s\n%!" line)
   in
   let open Cmdliner in
   let merge_fmt_path =
@@ -39,20 +70,19 @@ let mergetool =
 let merge =
   let setup update_git_config echo merge_fmt_path =
     let merge_fmt_path = Option.value ~default:"merge-fmt" merge_fmt_path in
-    let commands =
-      [ sprintf "git config --local merge.mergefmt.name 'merge-fmt driver'"
-      ; sprintf
-          "git config --local merge.mergefmt.driver '%s mergetool --base=%%O \
-           --current=%%A --other=%%B -o %%A --name=%%P'"
-          merge_fmt_path
-      ; sprintf "git config --local merge.tool 'mergefmt'"
-      ; sprintf "git config --local merge.default 'mergefmt'"
-      ]
+    let git_config key value =
+      ("git", [ A "config"; A "--local"; A key; Q value ])
     in
-    List.iter commands ~f:(fun line ->
-        if update_git_config
-        then system_respect_exit ~echo "%s" line
-        else Out_channel.printf "%s\n%!" line)
+    setup_commands ~update:update_git_config ~echo
+      [ git_config "merge.mergefmt.name" "merge-fmt driver"
+      ; git_config "merge.mergefmt.driver"
+          (sprintf
+             "%s mergetool --base=%%O --current=%%A --other=%%B -o %%A \
+              --name=%%P"
+             merge_fmt_path)
+      ; git_config "merge.tool" "mergefmt"
+      ; git_config "merge.default" "mergefmt"
+      ]
   in
   let open Cmdliner in
   let merge_fmt_path =
@@ -77,24 +107,18 @@ let merge =
 let jj_mergetool =
   let setup update_jj_config echo merge_fmt_path =
     let merge_fmt_path = Option.value ~default:"merge-fmt" merge_fmt_path in
-    let commands =
-      [ sprintf "jj config set --repo merge-tools.merge-fmt.program %s"
-          (Stdlib.Filename.quote (sprintf "%S" merge_fmt_path))
-      ; "jj config set --repo merge-tools.merge-fmt.merge-args \
-         '[\"mergetool\", \"--base=$base\", \"--current=$left\", \
-         \"--other=$right\", \"-o\", \"$output\", \"--name=$path\", \
-         \"--diff3\"]'"
+    let jj_config key value =
+      ("jj", [ A "config"; A "set"; A "--repo"; A key; Q value ])
+    in
+    setup_commands ~update:update_jj_config ~echo
+      [ jj_config "merge-tools.merge-fmt.program" (sprintf "%S" merge_fmt_path)
         (* When there are conflicts, merge-fmt exits with 1 and writes the
            conflict markers to the output. jj only reads them back when they
-           contain the base, hence [--diff3] above. *)
-      ; "jj config set --repo merge-tools.merge-fmt.merge-conflict-exit-codes \
-         '[1]'"
+           contain the base, hence [--diff3] below. *)
+      ; jj_config "merge-tools.merge-fmt.merge-args"
+          {|["mergetool", "--base=$base", "--current=$left", "--other=$right", "-o", "$output", "--name=$path", "--diff3"]|}
+      ; jj_config "merge-tools.merge-fmt.merge-conflict-exit-codes" "[1]"
       ]
-    in
-    List.iter commands ~f:(fun line ->
-        if update_jj_config
-        then system_respect_exit ~echo "%s" line
-        else Out_channel.printf "%s\n%!" line)
   in
   let open Cmdliner in
   let merge_fmt_path =
