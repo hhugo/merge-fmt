@@ -104,7 +104,8 @@ type t =
 let%expect_test "custom merge tool" =
   within_temp_dir (fun () ->
       git_init ();
-      system "%s setup-merge --merge-fmt-path %s --update" merge_fmt merge_fmt;
+      system "%s setup-merge --merge-fmt-path %s --update" merge_fmt
+        merge_fmt_path;
       [%expect {||}];
       write "a.ml"
         {|
