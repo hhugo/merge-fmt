@@ -7,12 +7,11 @@ type config =
   ; dune_path : string option
   }
 
-type file =
-  | Copy
-  | Inplace
-
+(* How a formatter is run on a file. [File command]: [command] writes its
+   result to a file, which is part of the command. [Stdout command]: [command]
+   prints its result. *)
 type t =
-  | File of file * string
+  | File of string
   | Stdout of string
 
 type formatter = string -> t
@@ -25,10 +24,15 @@ let ocamlformat ~bin ~name ~output =
          ~f:(fun name -> " --name=" ^ Stdlib.Filename.quote name)
          name)
   in
-  File (Copy, sprintf "%s -o %s" command (Stdlib.Filename.quote output))
+  File (sprintf "%s -o %s" command (Stdlib.Filename.quote output))
 
-let refmt ~bin =
-  File (Inplace, sprintf "%s --inplace" (Option.value ~default:"refmt" bin))
+(* refmt chooses how to parse a file from its extension, which the files
+   being merged do not always have. *)
+let refmt ~bin ~interface =
+  Stdout
+    (sprintf "%s --parse=re --interface=%b"
+       (Option.value ~default:"refmt" bin)
+       interface)
 
 let dune ~bin =
   Stdout (sprintf "%s format-dune-file --" (Option.value ~default:"dune" bin))
@@ -42,8 +46,8 @@ let find ~config ~filename ~name =
   with
   | _, (".ml" | ".mli"), { ocamlformat_path; _ } ->
       Some (fun output -> ocamlformat ~bin:ocamlformat_path ~name ~output)
-  | _, (".re" | ".rei"), { refmt_path; _ } ->
-      Some (fun _ -> refmt ~bin:refmt_path)
+  | _, ((".re" | ".rei") as ext), { refmt_path; _ } ->
+      Some (fun _ -> refmt ~bin:refmt_path ~interface:(String.equal ext ".rei"))
   | ("dune" | "dune-project" | "dune-workspace"), "", { dune_path; _ } ->
       Some (fun _ -> dune ~bin:dune_path)
   | _ -> None
@@ -67,7 +71,7 @@ let run_stdout command ~echo ~filename ~output =
 
 let run t ~echo ~filename =
   match t with
-  | File (_, command) ->
+  | File command ->
       system ~echo "%s %s" command (Stdlib.Filename.quote filename)
   | Stdout command -> run_stdout command ~echo ~filename ~output:filename
 
@@ -81,15 +85,13 @@ let format_to_file (formatter : formatter) ~echo ~filename =
     output
   in
   match formatter filename with
-  | File (Copy, _) ->
+  | File _ ->
       let output = temp_file () in
       run (formatter output) ~echo ~filename |> Result.map ~f:(fun () -> output)
   | Stdout command ->
       let output = temp_file () in
       run_stdout command ~echo ~filename ~output
       |> Result.map ~f:(fun () -> output)
-  | File (Inplace, _) as t ->
-      run t ~echo ~filename |> Result.map ~f:(fun () -> filename)
 
 module Flags = struct
   open Cmdliner

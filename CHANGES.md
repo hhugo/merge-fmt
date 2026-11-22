@@ -23,6 +23,15 @@
   because a file could not be formatted.
 - `mergetool`: the file given with `-o` no longer needs to exist, it is
   created.
+- `setup-mergetool`: pass `--name` to `mergetool`, so that dune files are
+  formatted with `git mergetool`, and quote the file names.
+- Fix the formatting of Reason files: `refmt` was given an option it does not
+  have. It is now told how to parse the files, which do not always have the
+  `.re` or `.rei` extension when merging.
+- `mergetool`: Reason files are no longer formatted in place: the files given
+  with `--current`, `--base` and `--other` are left untouched.
+- Fail when a version of a conflicted file cannot be read from git, instead
+  of using an empty file.
 
 ## 0.5 (2026-11-19)
 

@@ -37,8 +37,7 @@ let mergetool =
           ; A "mergetool.mergefmt.cmd"
           ; Q
               (sprintf
-                 "%s mergetool --base=$BASE --current=$LOCAL --other=$REMOTE \
-                  -o $MERGED"
+                 {|%s mergetool --base="$BASE" --current="$LOCAL" --other="$REMOTE" -o "$MERGED" --name="$MERGED"|}
                  merge_fmt_path)
           ] )
       ; ( "git"
