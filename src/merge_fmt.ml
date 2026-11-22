@@ -11,4 +11,9 @@ let cmds =
     ; Setup_cmd.jj_mergetool
     ]
 
-let () = Stdlib.exit (Cmdliner.Cmd.eval cmds)
+let () =
+  (* Like git, do not translate line endings on Windows: the merged file may
+     be written to the standard output. *)
+  Stdlib.set_binary_mode_out Stdlib.stdout true;
+  Stdlib.set_binary_mode_out Stdlib.stderr true;
+  Stdlib.exit (Cmdliner.Cmd.eval cmds)

@@ -2,6 +2,12 @@ open! Base
 open! Stdio
 
 let ( ^/ ) = Stdlib.Filename.concat
+
+(* Do not translate line endings on Windows. *)
+let () =
+  Stdlib.set_binary_mode_out Stdlib.stdout true;
+  Stdlib.set_binary_mode_out Stdlib.stderr true
+
 let echo = ref false
 
 (* [Unix], extended with what the tests need. The standard library has no
@@ -23,9 +29,12 @@ module Unix = struct
           (List.exists !unset ~f:(fun key ->
                String.is_prefix binding ~prefix:(key ^ "="))))
 
+  (* There is no [/bin/sh] for a native Windows program: use the [sh] found
+     in the PATH, the one of Cygwin or MSYS2. *)
+  let sh = if Sys.win32 then "sh" else "/bin/sh"
+
   let spawn s ~stdout =
-    create_process_env "/bin/sh" [| "/bin/sh"; "-c"; s |] (environment ()) stdin
-      stdout stderr
+    create_process_env sh [| sh; "-c"; s |] (environment ()) stdin stdout stderr
 
   let system s = snd (waitpid [] (spawn s ~stdout))
 
@@ -47,6 +56,11 @@ module Unix = struct
     in
     loop ()
 end
+
+(* A path, as given to the shell. On Windows, the shell would interpret the
+   backslashes: Cygwin and MSYS2 also understand [C:/dir/file]. *)
+let sh_path path =
+  if Sys.win32 then String.tr path ~target:'\\' ~replacement:'/' else path
 
 let system fmt =
   Printf.ksprintf
@@ -104,14 +118,18 @@ let filter_hint expected =
   |> List.map ~f:normalize_could_not_apply
   |> String.concat ~sep:"\n" |> print_string
 
-(* On macOS, [git init] records extra settings describing the filesystem. *)
-let filter_macos_config output =
+(* [git init] records settings describing the filesystem, which depend on the
+   platform. *)
+let filter_platform_config output =
   String.split ~on:'\n' output
   |> List.filter ~f:(fun s ->
       not
-        (List.mem
-           [ "core.ignorecase=true"; "core.precomposeunicode=true" ]
-           (String.strip s) ~equal:String.equal))
+        (List.exists
+           [ "core.filemode="
+           ; "core.symlinks="
+           ; "core.ignorecase="
+           ; "core.precomposeunicode="
+           ] ~f:(fun prefix -> String.is_prefix (String.strip s) ~prefix)))
   |> String.concat ~sep:"\n" |> print_string
 
 let git_init () =
@@ -122,7 +140,7 @@ let git_init () =
 let merge_fmt =
   let current_dir = Unix.getcwd () in
   let tool = "../src/merge_fmt.exe" in
-  Stdlib.Filename.concat current_dir tool
+  sh_path (Stdlib.Filename.concat current_dir tool)
 
 let resolve () = system "%s" merge_fmt
 
@@ -135,7 +153,7 @@ let with_temp_dir f =
   let res = match f dir with x -> Ok x | exception e -> Error e in
   if keep_tmp_dir
   then eprintf "OUTPUT LEFT IN %s\n" dir
-  else system "rm -rf %s" dir;
+  else system "rm -rf %s" (sh_path dir);
   Result.ok_exn res
 
 let within_temp_dir ?(links = []) f =
@@ -147,6 +165,9 @@ let within_temp_dir ?(links = []) f =
       Unix.putenv ~key:"GIT_CONFIG_NOSYSTEM" ~data:"1";
       Unix.putenv ~key:"GIT_CONFIG_NOGLOBAL" ~data:"1";
 
+      (* Without [HOME], git for Windows looks for the global configuration
+         in the user profile. *)
+      Unix.putenv ~key:"GIT_CONFIG_GLOBAL" ~data:(temp_dir ^/ ".git" ^/ "none");
       Unix.unsetenv "GIT_CONFIG";
       Unix.unsetenv "HOME";
       Unix.unsetenv "XDG_CONFIG_HOME";
@@ -164,8 +185,10 @@ let within_temp_dir ?(links = []) f =
       let path_var = "PATH" in
       let old_path = Sys.getenv_exn path_var in
       let bin = temp_dir ^/ "bin" in
-      Unix.putenv ~key:path_var ~data:(String.concat ~sep:":" [ bin; old_path ]);
-      let () = system "mkdir %s" bin in
+      let path_sep = if Sys.win32 then ";" else ":" in
+      Unix.putenv ~key:path_var
+        ~data:(String.concat ~sep:path_sep [ bin; old_path ]);
+      let () = Unix.mkdir bin 0o700 in
       let () =
         List.iter links ~f:(fun (file, action, link_as) ->
             let link_as =
@@ -175,7 +198,7 @@ let within_temp_dir ?(links = []) f =
             in
             (* We use hard links to ensure that files remain available and unchanged even if
                jenga starts to rebuild while the test is running. *)
-            system "/bin/ln -T %s %s" file (temp_dir ^/ link_as))
+            Unix.link file (temp_dir ^/ link_as))
       in
       let () = Unix.chdir temp_dir in
       let res = match f () with x -> Ok x | exception e -> Error e in
@@ -187,11 +210,10 @@ let%expect_test _ =
   within_temp_dir (fun () ->
       git_init ();
       system "git config -l";
-      filter_macos_config [%expect.output];
+      filter_platform_config [%expect.output];
       [%expect
         {|
         core.repositoryformatversion=0
-        core.filemode=true
         core.bare=false
         core.logallrefupdates=true
         |}];
