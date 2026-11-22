@@ -160,7 +160,8 @@ let%expect_test "resolve from a subdirectory" =
       Unix.chdir "sub";
       resolve ();
       system "git status --short";
-      [%expect {|
+      [%expect
+        {|
                Resolved 1/1 ../other/b.ml
                Resolved 1/1 a.ml
                M  ../other/b.ml
