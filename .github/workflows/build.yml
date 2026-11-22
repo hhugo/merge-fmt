@@ -20,6 +20,10 @@ jobs:
           - windows-latest
         ocaml-compiler:
           - "5.5"
+        include:
+          # The lower bound, on Linux only.
+          - os: ubuntu-latest
+            ocaml-compiler: "4.14"
 
     runs-on: ${{ matrix.os }}
 
