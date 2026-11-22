@@ -1,42 +1,43 @@
-## Unreleased
+## 0.5.1 (2026-11-22)
 
+- Resolve the conflicts of the whole repository when run from a
+  subdirectory, and not only the ones below it. `merge-fmt` exited with 0
+  while conflicts remained elsewhere. (#36)
 - Fix the handling of file names when resolving conflicts: names containing
   spaces made `merge-fmt` fail, and shell special characters in names were
-  interpreted by the shell.
+  interpreted by the shell. (#29)
 - The versions of a file being merged are no longer written next to it
   (`a.ours.ml`, `a.theirs.ml`, `a.common.ml`), where they were left behind
-  when some conflicts remained.
+  when some conflicts remained. (#29)
+- Ignore a conflicted file missing from the working tree instead of
+  crashing: the other files are still resolved. (#36)
+- Fail when a version of a conflicted file cannot be read from git, instead
+  of using an empty file. (#32)
+- `mergetool`: when the formatter fails, merge the files as they are instead
+  of failing. A merge that does not conflict no longer becomes a conflict
+  because a file could not be formatted. (#31)
+- `mergetool`: dune and Reason files are no longer formatted in place: the
+  files given with `--current`, `--base` and `--other` are left untouched.
+  (#30, #32)
+- `mergetool`: the file given with `-o` no longer needs to exist, it is
+  created. (#35)
+- `setup-mergetool`: pass `--name` to `mergetool`, so that dune files are
+  formatted with `git mergetool`, and quote the file names. Run
+  `merge-fmt setup-mergetool --update` again to update an existing
+  configuration. (#32)
+- Fix the formatting of Reason files: `refmt` was given an option it does not
+  have. It is now told how to parse the files, which do not always have the
+  `.re` or `.rei` extension when merging. (#32)
+- Fix the formatting of dune files failing when the temporary directory is
+  on another filesystem. (#30)
 - Windows: `setup-mergetool`, `setup-merge` and `setup-jj-mergetool` no longer
   fail with `--update`, the commands they run relied on the quoting of a
   POSIX shell. (#34)
 - Windows: line endings are no longer translated in the files being merged.
   Files formatted with `dune` ended up with CRLF line endings, and so did a
   merged file written to the standard output. (#34)
-- The tests now pass on macOS, Windows and Alpine. OCaml 4.14 is required.
-  (#34)
-- Fix the formatting of dune files failing when the temporary directory is
-  on another filesystem.
-- `mergetool`: dune files are no longer formatted in place: the files given
-  with `--current`, `--base` and `--other` are left untouched.
-- `mergetool`: when the formatter fails, merge the files as they are instead
-  of failing. A merge that does not conflict no longer becomes a conflict
-  because a file could not be formatted.
-- `mergetool`: the file given with `-o` no longer needs to exist, it is
-  created.
-- `setup-mergetool`: pass `--name` to `mergetool`, so that dune files are
-  formatted with `git mergetool`, and quote the file names.
-- Fix the formatting of Reason files: `refmt` was given an option it does not
-  have. It is now told how to parse the files, which do not always have the
-  `.re` or `.rei` extension when merging.
-- `mergetool`: Reason files are no longer formatted in place: the files given
-  with `--current`, `--base` and `--other` are left untouched.
-- Fail when a version of a conflicted file cannot be read from git, instead
-  of using an empty file.
-- Fix a crash when a conflicted file is missing from the working tree: it is
-  now ignored, and the other files are still resolved.
-- Resolve the conflicts of the whole repository when run from a
-  subdirectory, and not only the ones below it. `merge-fmt` exited with 0
-  while conflicts remained elsewhere.
+- Require OCaml 4.14. (#34)
+- Tests: they now pass on macOS, Windows and Alpine. (#34)
 
 ## 0.5 (2026-11-19)
 
