@@ -26,7 +26,7 @@ resolve conflicts automatically.
 First configure the current git repository with
 ```
 merge-fmt setup-mergetool
-git config --local mergetool.mergefmt.cmd 'merge-fmt mergetool --base=$BASE --current=$LOCAL --other=$REMOTE -o $MERGED'
+git config --local mergetool.mergefmt.cmd 'merge-fmt mergetool --base="$BASE" --current="$LOCAL" --other="$REMOTE" -o "$MERGED" --name="$MERGED"'
 git config --local mergetool.mergefmt.trustExitCode true
 ```
 Then, use `git mergetool` to resolve conflicts with

@@ -1,6 +1,6 @@
 (library
  (name merge_fmt_test)
- (modules :standard \ setup_jj)
+ (modules :standard \ setup_jj refmt)
  (libraries base stdio unix)
  (inline_tests
   (deps ../src/merge_fmt.exe))
@@ -13,6 +13,18 @@
  (name merge_fmt_test_jj)
  (modules setup_jj)
  (enabled_if %{bin-available:jj})
+ (libraries base stdio unix merge_fmt_test)
+ (inline_tests
+  (deps ../src/merge_fmt.exe))
+ (preprocess
+  (pps ppx_devtools-expect)))
+
+;; Tests that need refmt. They are skipped when refmt is not installed.
+
+(library
+ (name merge_fmt_test_refmt)
+ (modules refmt)
+ (enabled_if %{bin-available:refmt})
  (libraries base stdio unix merge_fmt_test)
  (inline_tests
   (deps ../src/merge_fmt.exe))

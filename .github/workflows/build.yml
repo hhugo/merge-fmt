@@ -43,6 +43,11 @@ jobs:
           curl -fsSL https://github.com/jj-vcs/jj/releases/download/v0.47.1/jj-v0.47.1-x86_64-unknown-linux-musl.tar.gz \
             | sudo tar -xz -C /usr/local/bin ./jj
 
+      # The refmt tests are skipped when refmt is not installed.
+      - name: Install refmt
+        if: runner.os != 'Windows'
+        run: opam install reason
+
       - run: opam install . --with-test
 
       - run: opam exec -- make all
