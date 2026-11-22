@@ -113,6 +113,13 @@ let print_status () =
           printf "%s File %s\n" m f;
           print_endline (In_channel.read_all f))
 
+(* The files in the current directory, like [ls]. *)
+let list_files () =
+  let files = Stdlib.Sys.readdir "." in
+  Array.sort files ~compare:String.compare;
+  Array.iter files ~f:(fun file ->
+      if not (String.is_prefix file ~prefix:".") then print_endline file)
+
 let print_file file =
   printf "File %s\n" file;
   print_endline (In_channel.read_all file)
