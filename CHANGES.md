@@ -9,8 +9,9 @@
 - Windows: `setup-mergetool`, `setup-merge` and `setup-jj-mergetool` no longer
   fail with `--update`, the commands they run relied on the quoting of a
   POSIX shell. (#34)
-- Windows: line endings are no longer translated on the standard output,
-  where `mergetool` may write the merged file. (#34)
+- Windows: line endings are no longer translated in the files being merged.
+  Files formatted with `dune` ended up with CRLF line endings, and so did a
+  merged file written to the standard output. (#34)
 - The tests now pass on macOS, Windows and Alpine. OCaml 4.14 is required.
   (#34)
 

@@ -3,18 +3,25 @@ open Stdio
 
 let sprintf = Printf.sprintf
 
+(* The output of commands is read verbatim: on Windows, line endings are not
+   translated. *)
+let unix_open_process_in s =
+  let ic = Unix.open_process_in s in
+  Stdlib.set_binary_mode_in ic true;
+  ic
+
 let open_process_in ~echo fmt =
   Printf.ksprintf
     (fun s ->
       if echo then eprintf "+ %s\n%!" s;
-      Unix.open_process_in s)
+      unix_open_process_in s)
     fmt
 
 let open_process_in_respect_exit ~echo fmt =
   Printf.ksprintf
     (fun s ->
       if echo then eprintf "+ %s\n%!" s;
-      let ic = Unix.open_process_in s in
+      let ic = unix_open_process_in s in
       let contents = In_channel.input_all ic in
       match Unix.close_process_in ic with
       | WEXITED 0 -> contents
@@ -26,7 +33,7 @@ let open_process_in_status ~echo fmt =
   Printf.ksprintf
     (fun s ->
       if echo then eprintf "+ %s\n%!" s;
-      let ic = Unix.open_process_in s in
+      let ic = unix_open_process_in s in
       let contents = In_channel.input_all ic in
       match Unix.close_process_in ic with
       | WEXITED n -> (contents, n)
