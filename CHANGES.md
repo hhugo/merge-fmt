@@ -34,6 +34,9 @@
   of using an empty file.
 - Fix a crash when a conflicted file is missing from the working tree: it is
   now ignored, and the other files are still resolved.
+- Resolve the conflicts of the whole repository when run from a
+  subdirectory, and not only the ones below it. `merge-fmt` exited with 0
+  while conflicts remained elsewhere.
 
 ## 0.5 (2026-11-19)
 

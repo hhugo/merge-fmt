@@ -34,9 +34,13 @@ let conflict ~filename =
 
 (* [git ls-files -u -z] outputs a sequence of
    [<mode> <object> <stage>\t<file>\000]. With [-z], file names are output
-   verbatim: they can contain any character but the null one. *)
+   verbatim: they can contain any character but the null one.
+
+   [git ls-files] only lists the files below the current directory: [:/]
+   stands for the root of the repository. File names are relative to the
+   current directory. *)
 let ls ~echo () =
-  let ic = open_process_in ~echo "git ls-files -u -z" in
+  let ic = open_process_in ~echo "git ls-files -u -z -- :/" in
   let entries =
     In_channel.input_all ic |> String.split ~on:'\000'
     |> List.filter ~f:(fun entry -> not (String.is_empty entry))
