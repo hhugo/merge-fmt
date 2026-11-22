@@ -22,12 +22,13 @@
   "`merge-fmt` is a small wrapper on top git commands to help resolve conflicts by leveraging code formatters.")
  (depends
   (ocaml
-   (>= 4.8))
+   (>= 4.14))
   (cmdliner
    (>= 1.1.0))
   base
   stdio
   (ppx_devtools-expect :with-test)
+  (conf-diffutils :with-test)
   (ocamlformat
    (and
     (= 0.29.0)
