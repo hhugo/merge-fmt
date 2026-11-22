@@ -185,16 +185,18 @@ let within_temp_dir ?(links = []) f =
   let cwd = Unix.getcwd () in
   (* [Unix.umask] is not implemented on Windows. *)
   if not Sys.win32 then ignore (Unix.umask 0o077 : int);
+  with_temp_dir @@ fun home ->
   with_temp_dir (fun temp_dir ->
       (* disable all external git configuration configuration *)
       Unix.putenv ~key:"GIT_CONFIG_NOSYSTEM" ~data:"1";
       Unix.putenv ~key:"GIT_CONFIG_NOGLOBAL" ~data:"1";
 
-      (* Without [HOME], git for Windows looks for the global configuration
-         in the user profile. *)
-      Unix.putenv ~key:"GIT_CONFIG_GLOBAL" ~data:(temp_dir ^/ ".git" ^/ "none");
       Unix.unsetenv "GIT_CONFIG";
-      Unix.unsetenv "HOME";
+      (* Use an empty home directory. Without [HOME], git looks elsewhere for
+         the configuration of the user on Windows: in the user profile for
+         Git for Windows, in the home directory of the POSIX environment for
+         the git of Cygwin and MSYS2. *)
+      Unix.putenv ~key:"HOME" ~data:home;
       Unix.unsetenv "XDG_CONFIG_HOME";
       (* The tests run under dune; make nested dune invocations behave as if
          run by a user (no missing dune-project warning, no stray _build). *)
