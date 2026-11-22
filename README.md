@@ -1,6 +1,8 @@
 Merge-fmt - git mergetool leveraging code formatters
 ====================================================
 
+[![build](https://github.com/hhugo/merge-fmt/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/hhugo/merge-fmt/actions/workflows/build.yml?query=branch%3Amain)
+
 WARNING: This tool is still experimental.
 
 `merge-fmt` is a small wrapper on top git commands to help resolve conflicts by leveraging
