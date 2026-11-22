@@ -67,7 +67,10 @@ let run t ~echo ~filename =
       let ic =
         open_process_in ~echo "%s %s" t (Stdlib.Filename.quote filename)
       in
-      let tmp_file, oc = Stdlib.Filename.open_temp_file "merge-fmt" "stdout" in
+      let tmp_file, oc =
+        Stdlib.Filename.open_temp_file ~mode:[ Open_binary ] "merge-fmt"
+          "stdout"
+      in
       transfer ic oc;
       Stdlib.close_out oc;
       match Unix.close_process_in ic with

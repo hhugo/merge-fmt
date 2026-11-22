@@ -1,9 +1,10 @@
-36a37,40
->       system "git rebase branch2^ -q";
+36a37,41
+>       (* Not [branch2^]: the caret is the escape character of [cmd.exe]. *)
+>       system "git rebase branch2~1 -q";
 >       print_status ();
 >       [%expect {|
 >         no changes |}];
-41,43c45,48
+41,43c46,49
 <         CONFLICT (modify/delete): a.ml deleted in HEAD and modified in 5f62452 (second commit (fork)).  Version 5f62452 (second commit (fork)) of a.ml left in tree.
 <         error: could not apply 5f62452... second commit (fork)
 <         Could not apply 5f62452... second commit (fork)
@@ -12,21 +13,21 @@
 >         CONFLICT (content): Merge conflict in b.ml
 >         error: could not apply 6070a8f... second commit (fork)
 >         Could not apply 6070a8f... second commit (fork)
-49c54
+49c55
 <         DU File a.ml
 ---
 >         UU File b.ml
-50a56,59
+50a57,60
 >         <<<<<<< HEAD
 >         type t = { a : int; b : string;
 >                    c : float; d : unit option }
 >         =======
-55c64,65
+55c65,66
 <           } |}];
 ---
 >           }
 >         >>>>>>> 6070a8f (second commit (fork)) |}];
-57,60c67,68
+57,60c68,69
 <       [%expect
 <         {|
 <         Ignore a.ml (not a 3-way merge)
@@ -34,12 +35,12 @@
 ---
 >       [%expect {|
 >         Resolved 1/1 b.ml |}];
-64,65c72
+64,65c73
 <         DU File a.ml
 < 
 ---
 >         M File b.ml
-67,69c74,77
+67,69c75,78
 <           { a : int option;
 <             b : string;
 <             c : float;
@@ -48,7 +49,7 @@
 >           ; b : string
 >           ; c : float
 >           ; d : unit option
-74,77c82,83
+74,77c83,84
 <         a.ml: needs merge
 <         You must edit all merge conflicts and then
 <         mark them as resolved using git add

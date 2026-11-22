@@ -34,7 +34,8 @@ type t =
       git_commit "second commit (fork)";
       git_branch "old_branch1";
       [%expect {| Switched to branch 'branch1' |}];
-      system "git rebase branch2^ -q";
+      (* Not [branch2^]: the caret is the escape character of [cmd.exe]. *)
+      system "git rebase branch2~1 -q";
       print_status ();
       [%expect {|
         no changes |}];
